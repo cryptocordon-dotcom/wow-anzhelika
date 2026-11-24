@@ -403,29 +403,38 @@ FLAVORS.unshift(
   {id:"fl_raffaello",c:"#efe6d6"}
 );
 const FL_NEW = {
- ru:{fl_sub:"Любой дизайн можно собрать с любой начинкой. Все начинки — по рецептам Анжелики, и коллекция постоянно пополняется. Не нашли любимый вкус? Напишите, обсудим.",fl_new:"Новинка",
+ ru:{fl_sub:"Любой дизайн можно собрать с любой начинкой: от любимой классики до фирменных рецептов Анжелики (они отмечены значком). Коллекция постоянно пополняется. Не нашли свой вкус? Напишите, обсудим.",fl_new:"Новинка",
   fl_bueno:"Буэно",fl_bueno_l:"ореховый бисквит · крем на молочном шоколаде с фундучной пастой · хрустящая вафельная прослойка · дроблёный фундук",
   fl_snickers:"Сникерс",fl_snickers_l:"шоколадный бисквит · солёная карамель · жареный арахис · сливочно-нугатовый крем · шоколадный ганаш",
   fl_raffaello:"Рафаэлло",fl_raffaello_l:"ванильный бисквит с кокосом · крем на белом шоколаде с кокосом · миндаль · кокосовая стружка"},
- en:{fl_sub:"Any design can be made with any filling. Every filling is Angelika's own recipe, and new ones keep coming. Can't see your favourite? Message us and we'll make it.",fl_new:"New",
+ en:{fl_sub:"Any design can be made with any filling: from much-loved classics to Angelika's signature recipes (marked with a badge). New flavours keep coming. Can't see yours? Message us.",fl_new:"New",
   fl_bueno:"Bueno",fl_bueno_l:"hazelnut sponge · milk chocolate and hazelnut cream · crunchy wafer layer · chopped hazelnuts",
   fl_snickers:"Snickers",fl_snickers_l:"chocolate sponge · salted caramel · roasted peanuts · creamy nougat cream · chocolate ganache",
   fl_raffaello:"Raffaello",fl_raffaello_l:"vanilla coconut sponge · white chocolate coconut cream · almonds · coconut flakes"},
- bg:{fl_sub:"Всеки дизайн може да е с всяка плънка. Всички плънки са по рецепти на Анжелика и колекцията постоянно расте. Не виждате любимия си вкус? Пишете ни.",fl_new:"Ново",
+ bg:{fl_sub:"Всеки дизайн може да е с всяка плънка: от любимата класика до авторските рецепти на Анжелика (отбелязани със знак). Колекцията постоянно расте. Не виждате своя вкус? Пишете ни.",fl_new:"Ново",
   fl_bueno:"Буено",fl_bueno_l:"блат с лешници · крем от млечен шоколад с лешников пастет · хрупкав вафлен слой · натрошени лешници",
   fl_snickers:"Сникърс",fl_snickers_l:"шоколадов блат · солен карамел · печени фъстъци · кремообразен нуга крем · шоколадов ганаш",
   fl_raffaello:"Рафаело",fl_raffaello_l:"ванилов блат с кокос · крем от бял шоколад с кокос · бадеми · кокосови стърготини"},
- ch:{fl_sub:"Jedes Design mit jeder Füllung. Alle Füllungen sind Angelikas eigene Rezepte, und es kommen laufend neue dazu. Ihr Lieblingsgeschmack fehlt? Schreiben Sie uns.",fl_new:"Neu",
+ ch:{fl_sub:"Jedes Design mit jeder Füllung: von beliebten Klassikern bis zu Angelikas Hausrezepten (mit Abzeichen markiert). Es kommen laufend neue dazu. Ihr Geschmack fehlt? Schreiben Sie uns.",fl_new:"Neu",
   fl_bueno:"Bueno",fl_bueno_l:"Haselnussbiskuit · Milchschokoladen-Haselnuss-Creme · knusprige Waffelschicht · gehackte Haselnüsse",
   fl_snickers:"Snickers",fl_snickers_l:"Schokoladenbiskuit · Salzkaramell · geröstete Erdnüsse · Nougatcreme · Schokoladenganache",
   fl_raffaello:"Raffaello",fl_raffaello_l:"Vanille-Kokos-Biskuit · Kokoscreme mit weisser Schokolade · Mandeln · Kokosraspeln"},
- it:{fl_sub:"Ogni design con qualsiasi ripieno. Tutti i ripieni sono ricette di Angelika e la collezione cresce di continuo. Non trovi il tuo gusto preferito? Scrivici.",fl_new:"Novità",
+ it:{fl_sub:"Ogni design con qualsiasi ripieno: dai grandi classici alle ricette d'autore di Angelika (segnate da un'etichetta). La collezione cresce di continuo. Non trovi il tuo gusto? Scrivici.",fl_new:"Novità",
   fl_bueno:"Bueno",fl_bueno_l:"pan di spagna alle nocciole · crema al cioccolato al latte e nocciole · strato croccante di wafer · granella di nocciole",
   fl_snickers:"Snickers",fl_snickers_l:"pan di spagna al cioccolato · caramello salato · arachidi tostate · crema al torrone · ganache al cioccolato",
   fl_raffaello:"Raffaello",fl_raffaello_l:"pan di spagna vaniglia e cocco · crema al cioccolato bianco e cocco · mandorle · scaglie di cocco"},
- ua:{fl_sub:"Будь-який дизайн можна зробити з будь-якою начинкою. Усі начинки — за рецептами Анжеліки, і колекція постійно поповнюється. Не знайшли улюблений смак? Напишіть, обговоримо.",fl_new:"Новинка",
+ ua:{fl_sub:"Будь-який дизайн можна зробити з будь-якою начинкою: від улюбленої класики до фірмових рецептів Анжеліки (вони позначені значком). Колекція постійно поповнюється. Не знайшли свій смак? Напишіть, обговоримо.",fl_new:"Новинка",
   fl_bueno:"Буено",fl_bueno_l:"горіховий бісквіт · крем на молочному шоколаді з фундуковою пастою · хрустка вафельна прошарка · подрібнений фундук",
   fl_snickers:"Снікерс",fl_snickers_l:"шоколадний бісквіт · солона карамель · смажений арахіс · вершково-нугатовий крем · шоколадний ганаш",
   fl_raffaello:"Рафаелло",fl_raffaello_l:"ванільний бісквіт з кокосом · крем на білому шоколаді з кокосом · мигдаль · кокосова стружка"}
 };
 Object.keys(FL_NEW).forEach(l=>{ if(CAT_I18N[l]) Object.assign(CAT_I18N[l],FL_NEW[l]); });
+
+/* ===== Фирменные и обычные начинки (24.11.2026) =====
+   «Остров» — это торт, а чизкейк бывает разных вкусов: в списке начинок их нет, начинку для них выбирает клиент. */
+const FL_REMOVE = ["fl_island","fl_cheese"];
+for (let i = FLAVORS.length - 1; i >= 0; i--) if (FL_REMOVE.includes(FLAVORS[i].id)) FLAVORS.splice(i, 1);
+const FL_SIGNATURE = ["fl_bueno","fl_snickers","fl_raffaello","fl_berry","fl_mcflurry","fl_peanut","fl_lemon","fl_jelly"];
+FLAVORS.forEach(f => { f.sig = FL_SIGNATURE.includes(f.id) ? 1 : 0; });
+FLAVORS.sort((a, b) => b.sig - a.sig);                      /* сначала фирменные, потом классика */
+CATALOG.forEach(p => { if (FL_REMOVE.includes(p.flavor)) p.flavor = ""; });

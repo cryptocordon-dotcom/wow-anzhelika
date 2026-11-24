@@ -2603,7 +2603,7 @@ function flavorArt(id){
 }
 function renderFlavors(){
   $("#flGrid").innerHTML=FLAVORS.map(f=>`<article class="flcard">${f.photo?`<img src="${f.photo}" alt="" loading="lazy">`:`<i class="fla" style="--fc:${f.c}">${flavorArt(f.id)}</i>`}
-    <div><h4>${esc(t(f.id))} <em>${t("fl_sig")}</em>${f.isNew?` <em class="isnew">${t("fl_new")}</em>`:""}</h4><ul>${t(f.id+"_l").split(" · ").map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></article>`).join(""); }
+    <div><h4>${esc(t(f.id))}${f.sig?` <em>${t("fl_sig")}</em>`:""}${f.isNew?` <em class="isnew">${t("fl_new")}</em>`:""}</h4><ul>${t(f.id+"_l").split(" · ").map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></article>`).join(""); }
 /* Булочки: цена за штуку, заказ от BUN_MIN шт. одного вида. Скидка −20 % на них не действует. */
 const BUN_MIN = 5;
 const BUNS = [
