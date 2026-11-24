@@ -399,8 +399,8 @@ const CATALOG = CAT_RAW.trim().split("\n").map(line=>{ const [id,type,tags,title
 /* ===== Новые начинки (24.11.2026) и обновлённый текст раздела «Что внутри» ===== */
 FLAVORS.unshift(
   {id:"fl_bueno",c:"#b07a46",isNew:1},
-  {id:"fl_snickers",c:"#6b3f22",isNew:1},
-  {id:"fl_raffaello",c:"#efe6d6",isNew:1}
+  {id:"fl_snickers",c:"#6b3f22"},
+  {id:"fl_raffaello",c:"#efe6d6"}
 );
 const FL_NEW = {
  ru:{fl_sub:"Любой дизайн можно собрать с любой начинкой. Все начинки — по рецептам Анжелики, и коллекция постоянно пополняется. Не нашли любимый вкус? Напишите, обсудим.",fl_new:"Новинка",

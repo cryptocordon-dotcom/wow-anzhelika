@@ -464,6 +464,10 @@ body.lock{overflow:hidden}
 .flcard img,.flcard i{flex:none;width:68px;height:68px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--line)}
 .flcard h4{font:400 18px/1.2 "Playfair Display",serif;margin-bottom:6px}
 .flcard h4 em.isnew{background:var(--berry);color:#fff}
+.flcard i.fla{display:block;overflow:hidden;background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--fc) 20%,#fffaf3),color-mix(in srgb,var(--fc) 9%,var(--card)) 72%)}
+.flcard i.fla svg{width:100%;height:100%;display:block;transition:transform .5s cubic-bezier(.3,1.6,.6,1)}
+.flcard:hover i.fla svg{transform:translateY(-2px) rotate(-3deg) scale(1.05)}
+.flcard h4 em+em{margin-left:4px}
 /* Об Анжелике */
 .about{padding:110px 0 90px}
 .about-grid{display:grid;grid-template-columns:1fr 1.05fr;gap:70px;align-items:center}
@@ -2549,9 +2553,57 @@ function renderCatGrid(){
   const more=$("#catMore"); more.hidden=list.length<=cat.shown; more.textContent=`${t("cat_more")} (${list.length-cat.shown})`;
   if(typeof seenIO!=="undefined") watchInview();
 }
+/* Начинки без фото — рисунок: кусочек торта в разрезе со своими слоями и украшением сверху.
+   L: слои сверху вниз [цвет, высота, бисквит(крошка), узор]; top — цвет верха; deco — украшение */
+const FL_ART = {
+  fl_bueno:     {L:[["#c99b63",7,1],["#8b5a33",4],["#e8c07f",3,0,"wafer"],["#c99b63",7,1],["#8b5a33",4],["#c99b63",8,1]], top:"#8b5a33", deco:"bueno"},
+  fl_snickers:  {L:[["#4a2c20",7,1],["#c9822e",3],["#e8d3b0",4,0,"nuts"],["#4a2c20",7,1],["#c9822e",3],["#e8d3b0",3],["#4a2c20",7,1]], top:"#3a2016", deco:"snickers"},
+  fl_raffaello: {L:[["#f2e4c4",8,1],["#fbf6ec",4,0,"coco"],["#f2e4c4",8,1],["#fbf6ec",4,0,"coco"],["#f2e4c4",8,1]], top:"#fbf7ef", deco:"raffaello"},
+  fl_cherry_choc:{L:[["#4a2c20",8,1],["#7a1328",3,0,"berry"],["#f1dfd2",3],["#4a2c20",8,1],["#7a1328",3,0,"berry"],["#4a2c20",8,1]], top:"#3b2016", deco:"cherry"},
+  fl_caramel:   {L:[["#d6a05a",8,1],["#c27a2c",3],["#ecd5ae",4],["#d6a05a",8,1],["#c27a2c",3],["#d6a05a",8,1]], top:"#ecd5ae", deco:"caramel"},
+  fl_pistachio: {L:[["#b9c98c",8,1],["#c2304f",3,0,"berry"],["#dbe6bd",4],["#b9c98c",8,1],["#c2304f",3,0,"berry"],["#b9c98c",8,1]], top:"#dbe6bd", deco:"pistachio"},
+  fl_mango:     {L:[["#f1dca5",8,1],["#f2a12e",4],["#fbf3e3",3],["#f1dca5",8,1],["#f2a12e",4],["#f1dca5",7,1]], top:"#fbf3e3", deco:"mango"},
+  fl_redvelvet: {L:[["#b3243d",8,1],["#fbf3ea",4],["#b3243d",8,1],["#fbf3ea",4],["#b3243d",8,1]], top:"#fbf3ea", deco:"berries"},
+  fl_choc_nut:  {L:[["#4a2c20",8,1],["#b98b5a",3,0,"nuts"],["#2e170e",3],["#4a2c20",8,1],["#b98b5a",3,0,"nuts"],["#4a2c20",8,1]], top:"#2e170e", deco:"nuts"}
+};
+function flavorArt(id){
+  const A=FL_ART[id]; if(!A) return ""; const p="fa"+id.replace(/\W/g,""); ARTN=0; const rn=mkRng(id.length*17+A.L.length*5);
+  const nut=(x,y,r)=>`<ellipse cx="${f1(x)}" cy="${f1(y)}" rx="${f1(r)}" ry="${f1(r*.8)}" fill="#9a6532"/><ellipse cx="${f1(x-r*.3)}" cy="${f1(y-r*.3)}" rx="${f1(r*.35)}" ry="${f1(r*.22)}" fill="#e9c38f" opacity=".7"/>`;
+  const ball=(x,y,r)=>{ let s=`<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r)}" fill="#fbf7ee" stroke="#e3d6bf" stroke-width=".6"/>`; for(let k=0;k<7;k++){ const a=k*.9; s+=`<rect x="${f1(x+Math.cos(a)*r*.55)}" y="${f1(y+Math.sin(a)*r*.55)}" width="1.6" height=".6" fill="#e6dcc9" transform="rotate(${k*40} ${f1(x)} ${f1(y)})"/>`; } return s+`<circle cx="${f1(x-r*.35)}" cy="${f1(y-r*.35)}" r="${f1(r*.25)}" fill="#fff"/>`; };
+  const drip=c=>{ let s=`<path d="M12 29.5Q35 18 58.5 21L58.5 24.5Q35 22 12 33Z" fill="${c}"/>`;
+    [.1,.26,.42,.58,.74,.9].forEach((t,i)=>{ const x=12+46.5*t, y=31.5-9.5*t, h=5+((i*5)%6); s+=`<rect x="${f1(x-1.7)}" y="${f1(y-1)}" width="3.4" height="${h}" rx="1.7" fill="${c}"/><path d="M${f1(x-.6)} ${f1(y)}l0 ${f1(h-2.5)}" stroke="#fff" stroke-opacity=".5" stroke-width=".7" stroke-linecap="round"/>`; });
+    return s+`<path d="M15 30Q35 20.5 57 22.3" stroke="#fff" stroke-opacity=".55" stroke-width=".9" fill="none"/>`; };
+  let y=30, yy=y, s=`<ellipse cx="40" cy="64" rx="30" ry="8" fill="#000" opacity=".12"/><ellipse cx="40" cy="61" rx="31" ry="8.5" fill="#fffaf3" stroke="#e6d8c6" stroke-width="1"/>`;
+  const sum=A.L.reduce((a,l)=>a+l[1],0);
+  s+=`<path d="M14 ${y}L58 ${y-8}L66 ${y-4}L66 ${y+sum}L14 ${y+sum+4}Z" fill="${mix(A.L[0][0],-.25)}"/>`;
+  A.L.forEach(([c,h,sp,pat])=>{ const y0=yy, y1=yy+h, o=v=>(v-y)*.1;
+    s+=`<path d="M14 ${f1(y0)}L58 ${f1(y0-8+o(y0))}L58 ${f1(y1-8+o(y1))}L14 ${f1(y1)}Z" fill="${c}"/>`;
+    const n=sp?8:pat?7:0;
+    for(let k=0;k<n;k++){ const tx=.05+rn()*.9, x=14+44*tx, yb=y0+(y1-y0)*(.2+rn()*.6)-8*tx+o(y0)*tx;
+      if(sp) s+=`<circle cx="${f1(x)}" cy="${f1(yb)}" r="${f1(.5+rn()*.7)}" fill="${mix(c,-.35)}" opacity=".55"/>`;
+      else if(pat==="nuts") s+=`<ellipse cx="${f1(x)}" cy="${f1(yb)}" rx="1.4" ry="1" fill="#a06a35"/>`;
+      else if(pat==="berry") s+=`<circle cx="${f1(x)}" cy="${f1(yb)}" r="1.1" fill="${mix(c,-.3)}"/>`;
+      else if(pat==="coco") s+=`<rect x="${f1(x)}" y="${f1(yb)}" width="1.8" height=".6" fill="#e9e0cf"/>`;
+      else if(pat==="wafer") s+=`<path d="M${f1(x)} ${f1(y0-8*tx+o(y0)*tx)}l0 ${h}" stroke="${mix(c,-.25)}" stroke-width=".7"/>`; }
+    yy=y1; });
+  s+=`<path d="M58 ${y-8}L66 ${y-4}L66 ${f1(yy-2)}L58 ${f1(yy-8+(yy-y)*.1)}Z" fill="${mix(A.top,-.15)}"/>`;
+  s+=`<path d="M12 ${y}Q35 ${y-12} 58 ${y-9}Q64 ${y-8} 67 ${y-4}Q60 ${y-2} 58 ${y-1}Q35 ${y-3} 12 ${y+1}Z" fill="${A.top}"/><path d="M18 ${y-3}Q34 ${y-10} 52 ${y-8}" stroke="#fff" stroke-opacity=".5" stroke-width="1.4" fill="none" stroke-linecap="round"/>`;
+  const D={
+    bueno:()=>`<g transform="rotate(-18 46 17)"><rect x="36" y="14" width="20" height="5" rx="1.5" fill="#e8c07f"/><path d="M40 14v5M44 14v5M48 14v5M52 14v5" stroke="#c89a58" stroke-width=".7"/><path d="M36 16.5h20" stroke="#6b4123" stroke-width="1.6"/></g>`+nut(30,20,2.6)+nut(57,17,2.4),
+    snickers:()=>drip("#b8691f")+nut(34,20,2.6)+nut(41,17.5,2.6)+nut(48,16,2.6)+nut(55,16.5,2.4)+nut(45,20,2.2),
+    raffaello:()=>ball(41,15,6.5)+ball(53,14,5.5)+`<ellipse cx="30" cy="21" rx="3.6" ry="1.8" fill="#e2c59a" transform="rotate(-20 30 21)"/><ellipse cx="61" cy="18" rx="3.2" ry="1.6" fill="#e2c59a" transform="rotate(25 61 18)"/>`,
+    cherry:()=>cherry(p,44,19,4.2,1)+cherry(p,53,17,3.8,-2),
+    caramel:()=>drip("#a9611d")+[[38,20],[46,18],[52,17]].map(([x,y])=>`<rect x="${x}" y="${y}" width="1.6" height="1.6" fill="#fff" transform="rotate(30 ${x} ${y})"/>`).join(""),
+    pistachio:()=>rasp(p,44,18,3.6)+rasp(p,53,16,3.2)+[[34,21],[38,23],[58,18],[49,21]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1" fill="#7f9c46"/>`).join(""),
+    mango:()=>mango(p,44,17,6,10)+mango(p,53,15,5,-14)+mint(p,32,20,4,-20),
+    berries:()=>rasp(p,43,18,3.6)+blue(p,51,17,2.6)+rasp(p,56,15,3)+mint(p,32,21,4,-25),
+    nuts:()=>nut(38,20,2.6)+nut(46,17,2.8)+nut(54,16,2.4)+shard(p,50,14,4,15)
+  };
+  return `<svg viewBox="0 0 80 80" aria-hidden="true">${artDefs(p)}${s}${(D[A.deco]||(()=>""))()}</svg>`;
+}
 function renderFlavors(){
-  $("#flGrid").innerHTML=FLAVORS.map(f=>`<article class="flcard">${f.photo?`<img src="${f.photo}" alt="" loading="lazy">`:`<i style="background:radial-gradient(circle at 35% 30%,${mix(f.c,.35)},${f.c} 60%,${mix(f.c,-.35)})"></i>`}
-    <div><h4>${esc(t(f.id))}${f.isNew?` <em class="isnew">${t("fl_new")}</em>`:f.sig?` <em>${t("fl_sig")}</em>`:""}</h4><ul>${t(f.id+"_l").split(" · ").map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></article>`).join(""); }
+  $("#flGrid").innerHTML=FLAVORS.map(f=>`<article class="flcard">${f.photo?`<img src="${f.photo}" alt="" loading="lazy">`:`<i class="fla" style="--fc:${f.c}">${flavorArt(f.id)}</i>`}
+    <div><h4>${esc(t(f.id))} <em>${t("fl_sig")}</em>${f.isNew?` <em class="isnew">${t("fl_new")}</em>`:""}</h4><ul>${t(f.id+"_l").split(" · ").map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></article>`).join(""); }
 /* Булочки: цена за штуку, заказ от BUN_MIN шт. одного вида. Скидка −20 % на них не действует. */
 const BUN_MIN = 5;
 const BUNS = [
