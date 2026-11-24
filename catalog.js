@@ -430,11 +430,17 @@ const FL_NEW = {
 };
 Object.keys(FL_NEW).forEach(l=>{ if(CAT_I18N[l]) Object.assign(CAT_I18N[l],FL_NEW[l]); });
 
-/* ===== Фирменные и обычные начинки (24.11.2026) =====
-   «Остров» — это торт, а чизкейк бывает разных вкусов: в списке начинок их нет, начинку для них выбирает клиент. */
-const FL_REMOVE = ["fl_island","fl_cheese"];
-for (let i = FLAVORS.length - 1; i >= 0; i--) if (FL_REMOVE.includes(FLAVORS[i].id)) FLAVORS.splice(i, 1);
+/* ===== Фирменные и обычные начинки (24.11.2026) ===== */
+/* Остров — торт с любой начинкой, чизкейк — разных вкусов: остаются в списке, состав уточнён (FL_FIX ниже) */
 const FL_SIGNATURE = ["fl_bueno","fl_snickers","fl_raffaello","fl_berry","fl_mcflurry","fl_peanut","fl_lemon","fl_jelly"];
 FLAVORS.forEach(f => { f.sig = FL_SIGNATURE.includes(f.id) ? 1 : 0; });
 FLAVORS.sort((a, b) => b.sig - a.sig);                      /* сначала фирменные, потом классика */
-CATALOG.forEach(p => { if (FL_REMOVE.includes(p.flavor)) p.flavor = ""; });
+const FL_FIX = {
+ ru:{fl_island_l:"торт с любой начинкой на выбор · классика: шоколадный бисквит, солёная карамель, фундук",fl_cheese_l:"разные вкусы на выбор · хрустящая песочная основа · сливочный сыр · свежие ягоды"},
+ en:{fl_island_l:"a cake with any filling you like · classic: chocolate sponge, salted caramel, hazelnuts",fl_cheese_l:"many flavours to choose from · crunchy shortcrust base · cream cheese · fresh berries"},
+ bg:{fl_island_l:"торта с плънка по избор · класика: шоколадов блат, солен карамел, лешници",fl_cheese_l:"различни вкусове по избор · хрупкава маслена основа · крема сирене · пресни плодове"},
+ ch:{fl_island_l:"Torte mit Füllung nach Wahl · Klassiker: Schokoladenbiskuit, Salzkaramell, Haselnüsse",fl_cheese_l:"viele Geschmacksrichtungen · knuspriger Mürbeteigboden · Frischkäse · frische Beeren"},
+ it:{fl_island_l:"torta con il ripieno che preferisci · classica: pan di spagna al cioccolato, caramello salato, nocciole",fl_cheese_l:"tanti gusti a scelta · base croccante di frolla · formaggio cremoso · frutti di bosco freschi"},
+ ua:{fl_island_l:"торт з будь-якою начинкою на вибір · класика: шоколадний бісквіт, солона карамель, фундук",fl_cheese_l:"різні смаки на вибір · хрустка пісочна основа · вершковий сир · свіжі ягоди"}
+};
+Object.keys(FL_FIX).forEach(l => { if (CAT_I18N[l]) Object.assign(CAT_I18N[l], FL_FIX[l]); });
