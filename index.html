@@ -2373,12 +2373,12 @@ const I18N_BUNS = {
 };
 Object.keys(I18N_BUNS).forEach(l=>Object.assign(I18N[l],I18N_BUNS[l]));
 const I18N_BUNS2 = {
- ru:{bun_apple:"С яблоком",bun_apple_d:"Сдобная булочка с яблочной начинкой.",bun_vatrushka:"Ватрушка с творогом",bun_vatrushka_d:"Сдобная ватрушка с нежной творожной начинкой."},
- en:{bun_apple:"Apple",bun_apple_d:"Soft bun with apple filling.",bun_vatrushka:"Cottage cheese vatrushka",bun_vatrushka_d:"Soft round bun with a gentle sweet cottage cheese filling."},
- bg:{bun_apple:"С ябълка",bun_apple_d:"Мека кифличка с ябълков пълнеж.",bun_vatrushka:"Ватрушка с извара",bun_vatrushka_d:"Мека ватрушка с нежна плънка от извара."},
- ch:{bun_apple:"Apfel",bun_apple_d:"Weiches Brötchen mit Apfelfüllung.",bun_vatrushka:"Watruschka mit Quark",bun_vatrushka_d:"Weiches rundes Hefegebäck mit zarter Quarkfüllung."},
- it:{bun_apple:"Mela",bun_apple_d:"Panino morbido ripieno di mele.",bun_vatrushka:"Vatrushka al formaggio fresco",bun_vatrushka_d:"Panino tondo e morbido con delicato ripieno dolce di formaggio fresco."},
- ua:{bun_apple:"З яблуком",bun_apple_d:"Здобна булочка з яблучною начинкою.",bun_vatrushka:"Ватрушка з сиром",bun_vatrushka_d:"Здобна ватрушка з ніжною сирною начинкою."}
+ ru:{bun_cinnamon_d:"Витая сдобная булочка с корицей и сахаром, присыпанная сахарной пудрой.",bun_apple:"С яблоком",bun_apple_d:"Сдобная булочка с яблочной начинкой.",bun_vatrushka:"Ватрушка с творогом",bun_vatrushka_d:"Сдобная ватрушка с нежной творожной начинкой."},
+ en:{bun_cinnamon_d:"Twisted soft bun with cinnamon and sugar, dusted with icing sugar.",bun_apple:"Apple",bun_apple_d:"Soft bun with apple filling.",bun_vatrushka:"Cottage cheese vatrushka",bun_vatrushka_d:"Soft round bun with a gentle sweet cottage cheese filling."},
+ bg:{bun_cinnamon_d:"Плетена мека кифла с канела и захар, поръсена с пудра захар.",bun_apple:"С ябълка",bun_apple_d:"Мека кифличка с ябълков пълнеж.",bun_vatrushka:"Ватрушка с извара",bun_vatrushka_d:"Мека ватрушка с нежна плънка от извара."},
+ ch:{bun_cinnamon_d:"Geflochtenes Hefegebäck mit Zimt und Zucker, mit Puderzucker bestäubt.",bun_apple:"Apfel",bun_apple_d:"Weiches Brötchen mit Apfelfüllung.",bun_vatrushka:"Watruschka mit Quark",bun_vatrushka_d:"Weiches rundes Hefegebäck mit zarter Quarkfüllung."},
+ it:{bun_cinnamon_d:"Treccia morbida alla cannella e zucchero, spolverata di zucchero a velo.",bun_apple:"Mela",bun_apple_d:"Panino morbido ripieno di mele.",bun_vatrushka:"Vatrushka al formaggio fresco",bun_vatrushka_d:"Panino tondo e morbido con delicato ripieno dolce di formaggio fresco."},
+ ua:{bun_cinnamon_d:"Плетена здобна булочка з корицею та цукром, присипана цукровою пудрою.",bun_apple:"З яблуком",bun_apple_d:"Здобна булочка з яблучною начинкою.",bun_vatrushka:"Ватрушка з сиром",bun_vatrushka_d:"Здобна ватрушка з ніжною сирною начинкою."}
 };
 Object.keys(I18N_BUNS2).forEach(l=>Object.assign(I18N[l],I18N_BUNS2[l]));
 /* рисунок булочки, пока нет фото (viewBox 200×200) */
@@ -2645,12 +2645,12 @@ function renderFlavors(){
 /* Булочки: цена за штуку, заказ от BUN_MIN шт. одного вида. Скидка −20 % на них не действует. */
 const BUN_MIN = 5;
 const BUNS = [
-  {id:"bun_poppy_choc", price:2.5, photo:"img/bake/mak-shokolad.jpg"},
-  {id:"bun_poppy_sugar", price:2,  photo:"img/bake/mak-pudra.jpg"},
-  {id:"bun_cinnamon",   price:1.5, photo:"img/bake/koritsa.jpg"},
-  {id:"bun_cherry",     price:2,   photo:"", art:"cherry"},
-  {id:"bun_apple",      price:2,   photo:"", art:"apple"},
-  {id:"bun_vatrushka",  price:2,   photo:"", art:"vatrushka"}
+  {id:"bun_poppy_choc", price:2.5, photo:"img/bake/bun-mak-shokolad.jpg"},
+  {id:"bun_poppy_sugar", price:2,  photo:"img/bake/bun-mak-pudra.jpg"},
+  {id:"bun_cinnamon",   price:1.5, photo:"img/bake/bun-koritsa.jpg"},
+  {id:"bun_cherry",     price:2,   photo:"img/bake/bun-vishnya.jpg",   art:"cherry"},
+  {id:"bun_apple",      price:2,   photo:"img/bake/bun-yabloko.jpg",   art:"apple"},
+  {id:"bun_vatrushka",  price:2,   photo:"img/bake/bun-vatrushka.jpg", art:"vatrushka"}
 ];
 const bunQty = {};
 const bunPrice = (eur,l=lang)=> l==="ch" ? "CHF "+(eur*CONFIG.chfRate).toFixed(2) : (l==="en" ? "€"+String(eur).replace(/\.(\d)$/,".$10") : String(eur).replace(".",",")+" €");
