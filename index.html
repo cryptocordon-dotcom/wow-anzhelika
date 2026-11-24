@@ -2165,7 +2165,9 @@ function renderStatic(){
   document.querySelectorAll("[data-i18n]").forEach(el=>el.innerHTML=t(el.dataset.i18n));
   document.querySelectorAll("[data-i18n-ph]").forEach(el=>el.placeholder=plain(t(el.dataset.i18nPh)));
   $(".hero h1").innerHTML=t("hero_h1").split("<br>").map((ln,i)=>`<span class="ln"><span style="--d:${i}">${ln}</span></span>`).join("");
-  const mq=(PROMO_ON()?[t("promo_pill")]:[]).concat([t("ny_eyebrow")]).concat(t("marquee")), row=(Array.isArray(mq)?mq:[]).map(x=>`<span>${esc(x)}</span><i>·</i>`).join("");
+  /* плашка в начале экрана: к празднику — праздничная, иначе акция */
+  const pill=$("#nyPill"); if(pill){ pill.innerHTML = HOLIDAY ? t("hol_pill") : t("promo_pill"); pill.hidden = !HOLIDAY && !PROMO_ON(); }
+  const mq=(HOLIDAY?[t("hol_pill")]:[]).concat(PROMO_ON()?[t("promo_pill")]:[]).concat(HOLIDAY&&HOLIDAY.id==="ny"?[]:[t("ny_eyebrow")]).concat(t("marquee")), row=(Array.isArray(mq)?mq:[]).map(x=>`<span>${esc(x)}</span><i>·</i>`).join("");
   $("#marq").innerHTML=row+row+row+row;
   $("#langs").innerHTML=LANGS.map(l=>`<button type="button" data-lang="${l}" class="${l===lang?"on":""}">${l.toUpperCase()}</button>`).join("");
   renderTheme(); renderCare();
@@ -2177,7 +2179,10 @@ function renderHero(){
   if(CONFIG.heroVideo && !$("#heroBg video")){ $("#heroBg").insertAdjacentHTML("afterbegin",`<video src="${CONFIG.heroVideo}" autoplay muted loop playsinline></video>`); }
   /* главный экран: настоящее фото работы Анжелики (торт-остров), клик — к островам в каталоге */
   const hc=$("#heroCake"); hc.classList.add("hero-photo");
-  hc.innerHTML=`<button type="button" class="hp" data-feat="q_island"><img src="img/catalog/c020.jpg" alt="${esc(t("hero_photo"))}" fetchpriority="high"><span>${t("hero_photo")}</span></button>`;
+  /* к празднику — праздничное фото, клик ведёт в подборку к празднику */
+  hc.innerHTML = HOLIDAY
+    ? `<button type="button" class="hp" data-hol="1"><img src="img/catalog/${HOLIDAY.photo}.jpg" alt="${esc(t("hol_cap"))}" fetchpriority="high"><span>${t("hol_cap")}</span></button>`
+    : `<button type="button" class="hp" data-feat="q_island"><img src="img/catalog/c020.jpg" alt="${esc(t("hero_photo"))}" fetchpriority="high"><span>${t("hero_photo")}</span></button>`;
 }
 /* Новый год: вместо нарисованного рулета — коллаж из настоящих фото */
 function renderNY(){ const P=["c176","c056","c003"];
@@ -2314,6 +2319,88 @@ const I18N_COL = {
 };
 Object.keys(I18N_COL).forEach(l=>Object.assign(I18N[l],I18N_COL[l]));
 Object.keys(I18N_CLEAN).forEach(l=>Object.assign(I18N[l],I18N_CLEAN[l]));   /* чистые тексты — последними, поверх всех словарей */
+
+/* =========================================================
+   ПРАЗДНИКИ: титульный экран сам меняется под ближайший праздник.
+   lead — за сколько дней до праздника включать, after — сколько дней держать после.
+   Если окна праздников пересекаются — показываем тот, что ближе по дате.
+   Проверить любой праздник заранее: адрес сайта + ?holiday=mother (или ny, valentine, women, easter, mother_may, kids).
+   Чтобы выключить праздники совсем: HOLIDAYS_ON = false.
+   ========================================================= */
+const HOLIDAYS_ON = true;
+const lastSunday = (y,m)=>{ const d=new Date(y,m+1,0); d.setDate(d.getDate()-d.getDay()); return d; };
+const nthSunday = (y,m,n)=>{ const d=new Date(y,m,1); return new Date(y,m,1+(7-d.getDay())%7+7*(n-1)); };
+function orthodoxEaster(y){ const a=y%4,b=y%7,c=y%19,d=(19*c+15)%30,e=(2*a+4*b-d+34)%7, mo=Math.floor((d+e+114)/31), da=(d+e+114)%31+1;
+  const r=new Date(y,mo-1,da); r.setDate(r.getDate()+13); return r; }   /* православная Пасха (юлианская дата + 13 дней) */
+const HOLIDAYS = [
+  {id:"mother",     text:"mother",    date:y=>lastSunday(y,10),       lead:12, after:0, photo:"c066", who:"q_mom",  style:"q_any"},   /* День матери (последнее воскресенье ноября) */
+  {id:"ny",         text:"ny",        date:y=>new Date(y,11,31),      lead:30, after:1, photo:"c176", who:"q_all",  style:"q_any"},   /* Новый год и Рождество */
+  {id:"valentine",  text:"valentine", date:y=>new Date(y,1,14),       lead:12, after:0, photo:"c033", who:"q_love", style:"q_any"},
+  {id:"women",      text:"women",     date:y=>new Date(y,2,8),        lead:14, after:0, photo:"c081", who:"q_mom",  style:"q_any"},   /* 8 Марта (в Болгарии ещё и День матери) */
+  {id:"easter",     text:"easter",    date:orthodoxEaster,            lead:10, after:0, photo:"c003", who:"q_all",  style:"q_any"},
+  {id:"mother_may", text:"mother",    date:y=>nthSunday(y,4,2),       lead:10, after:0, photo:"c256", who:"q_mom",  style:"q_any"},   /* День матери (2-е воскресенье мая) */
+  {id:"kids",       text:"kids",      date:y=>new Date(y,5,1),        lead:12, after:0, photo:"c013", who:"q_kids", style:"q_any"}    /* 1 июня */
+];
+function activeHoliday(now=new Date()){
+  if(!HOLIDAYS_ON) return null;
+  const force=(location.search.match(/[?&]holiday=([\w]+)/)||[])[1];
+  const list=[];
+  HOLIDAYS.forEach(h=>{ for(let y=now.getFullYear()-1;y<=now.getFullYear()+1;y++){
+    const d=h.date(y), from=new Date(d), to=new Date(d);
+    from.setDate(from.getDate()-h.lead); from.setHours(0,0,0,0); to.setDate(to.getDate()+(h.after||0)); to.setHours(23,59,59,999);
+    if(force ? (h.id===force && d>=new Date(now.getFullYear(),now.getMonth(),now.getDate()-(h.after||0))) : (now>=from && now<=to)) list.push({...h,day:d}); } });
+  list.sort((a,b)=>a.day-b.day);
+  return list[0]||null;
+}
+const HOL_TXT = {
+ ru:{
+  mother:{eyebrow:"День матери · {date}",h1:"Торт для мамы<br><em>к её дню</em>",sub:"Нежные торты с цветами и ягодами, бенто и десерты, чтобы сказать маме «спасибо». Доставка от Несебра до Бургаса.",pill:"Подборка тортов для мамы →",cap:"Торт с пионами для мамы"},
+  ny:{eyebrow:"Новогодняя коллекция",h1:"Торт к Новому году<br><em>и Рождеству</em>",sub:"Торты и десерты к праздничному столу и в подарок. Новогодние заказы принимаем до 28 декабря.",pill:"Новогодние торты — заказ до 28 декабря",cap:"Зимний торт"},
+  valentine:{eyebrow:"День влюблённых · {date}",h1:"Торт для двоих<br><em>ко Дню влюблённых</em>",sub:"Бенто-сердце на двоих, парные бенто и торты с надписью для любимого человека. Доставка от Несебра до Бургаса.",pill:"Подборка для влюблённых →",cap:"Торт-сердце"},
+  women:{eyebrow:"8 Марта",h1:"Торт к 8 Марта<br><em>для любимых женщин</em>",sub:"Для мамы, жены, подруги и коллег: торты с цветами, бенто и наборы десертов. Заказывайте заранее: перед праздником много заказов.",pill:"Подборка к 8 Марта →",cap:"Торт с розами"},
+  easter:{eyebrow:"Пасха · {date}",h1:"Сладкий стол<br><em>к Светлой Пасхе</em>",sub:"Торты и десерты к праздничному столу и в гости. Доставка от Несебра до Бургаса.",pill:"Торты к Пасхе →",cap:"Весенний торт"},
+  kids:{eyebrow:"День защиты детей · {date}",h1:"Торт для ребёнка<br><em>ко Дню детей</em>",sub:"Торты с любимыми героями и цифрами, бенто и наборы капкейков для детского праздника. Доставка от Несебра до Бургаса.",pill:"Детские торты →",cap:"Детский торт"}},
+ en:{
+  mother:{eyebrow:"Mother's Day · {date}",h1:"A cake for Mum<br><em>on her day</em>",sub:"Gentle cakes with flowers and berries, bento and desserts to say thank you to Mum. Delivery from Nessebar to Burgas.",pill:"Cakes for Mum — see the selection →",cap:"Peony cake for Mum"},
+  ny:{eyebrow:"New Year collection",h1:"A cake for New Year<br><em>and Christmas</em>",sub:"Cakes and desserts for the festive table and as gifts. New Year orders until 28 December.",pill:"New Year cakes — order by 28 December",cap:"Winter cake"},
+  valentine:{eyebrow:"Valentine's Day · {date}",h1:"A cake for two<br><em>for Valentine's Day</em>",sub:"Heart-shaped bento for two, matching bento pairs and cakes with your message. Delivery from Nessebar to Burgas.",pill:"Cakes for two — see the selection →",cap:"Heart cake"},
+  women:{eyebrow:"8 March · Women's Day",h1:"A cake for 8 March<br><em>for the women you love</em>",sub:"For Mum, your wife, friends and colleagues: cakes with flowers, bento and dessert sets. Order early: the days before are busy.",pill:"Women's Day selection →",cap:"Rose cake"},
+  easter:{eyebrow:"Easter · {date}",h1:"A sweet table<br><em>for Easter</em>",sub:"Cakes and desserts for the festive table and for visiting family. Delivery from Nessebar to Burgas.",pill:"Easter selection →",cap:"Spring cake"},
+  kids:{eyebrow:"Children's Day · {date}",h1:"A cake for kids<br><em>on Children's Day</em>",sub:"Cakes with favourite characters and numbers, bento and cupcake sets for a children's party. Delivery from Nessebar to Burgas.",pill:"Kids' cakes →",cap:"Kids' cake"}},
+ bg:{
+  mother:{eyebrow:"Ден на майката · {date}",h1:"Торта за мама<br><em>за нейния ден</em>",sub:"Нежни торти с цветя и плодове, бенто и десерти, за да кажете „благодаря“ на мама. Доставка от Несебър до Бургас.",pill:"Торти за мама — вижте подборката →",cap:"Торта с божури за мама"},
+  ny:{eyebrow:"Новогодишна колекция",h1:"Торта за Нова година<br><em>и Коледа</em>",sub:"Торти и десерти за празничната трапеза и за подарък. Новогодишни поръчки до 28 декември.",pill:"Новогодишни торти — поръчки до 28 декември",cap:"Зимна торта"},
+  valentine:{eyebrow:"Свети Валентин · {date}",h1:"Торта за двама<br><em>за Свети Валентин</em>",sub:"Бенто-сърце за двама, бенто двойки и торти с надпис за любимия човек. Доставка от Несебър до Бургас.",pill:"Подборка за влюбени →",cap:"Торта-сърце"},
+  women:{eyebrow:"8 март · Ден на жената и майката",h1:"Торта за 8 март<br><em>за мама и любимите жени</em>",sub:"За мама, съпруга, приятелка и колеги: торти с цветя, бенто и комплекти десерти. Поръчайте навреме: преди празника има много поръчки.",pill:"Подборка за 8 март →",cap:"Торта с рози"},
+  easter:{eyebrow:"Великден · {date}",h1:"Сладка трапеза<br><em>за Великден</em>",sub:"Торти и десерти за празничната трапеза и за гости. Доставка от Несебър до Бургас.",pill:"Торти за Великден →",cap:"Пролетна торта"},
+  kids:{eyebrow:"Ден на детето · {date}",h1:"Торта за детето<br><em>за Деня на детето</em>",sub:"Торти с любими герои и цифри, бенто и комплекти мъфини за детски празник. Доставка от Несебър до Бургас.",pill:"Детски торти →",cap:"Детска торта"}},
+ ch:{
+  mother:{eyebrow:"Muttertag · {date}",h1:"Eine Torte für Mama<br><em>zu ihrem Tag</em>",sub:"Zarte Torten mit Blumen und Beeren, Bento und Desserts als Dankeschön für Mama. Lieferung von Nessebar bis Burgas.",pill:"Torten für Mama – zur Auswahl →",cap:"Pfingstrosen-Torte für Mama"},
+  ny:{eyebrow:"Neujahrskollektion",h1:"Eine Torte zu Neujahr<br><em>und Weihnachten</em>",sub:"Torten und Desserts für den Festtisch und als Geschenk. Neujahrsbestellungen bis 28. Dezember.",pill:"Neujahrstorten – Bestellung bis 28. Dezember",cap:"Wintertorte"},
+  valentine:{eyebrow:"Valentinstag · {date}",h1:"Eine Torte für zwei<br><em>zum Valentinstag</em>",sub:"Herz-Bento für zwei, Bento-Paare und Torten mit Ihrer Botschaft. Lieferung von Nessebar bis Burgas.",pill:"Für Verliebte – zur Auswahl →",cap:"Herztorte"},
+  women:{eyebrow:"8. März · Frauentag",h1:"Eine Torte zum 8. März<br><em>für die Frauen, die Sie lieben</em>",sub:"Für Mama, Partnerin, Freundinnen und Kolleginnen: Torten mit Blumen, Bento und Dessert-Sets. Bitte früh bestellen – vor dem Fest ist viel los.",pill:"Auswahl zum Frauentag →",cap:"Rosentorte"},
+  easter:{eyebrow:"Ostern · {date}",h1:"Süsses für<br><em>das Osterfest</em>",sub:"Torten und Desserts für den Festtisch und als Mitbringsel. Lieferung von Nessebar bis Burgas.",pill:"Auswahl zu Ostern →",cap:"Frühlingstorte"},
+  kids:{eyebrow:"Kindertag · {date}",h1:"Eine Torte für Kinder<br><em>zum Kindertag</em>",sub:"Torten mit Lieblingsfiguren und Zahlen, Bento und Cupcake-Sets für die Kinderparty. Lieferung von Nessebar bis Burgas.",pill:"Kindertorten →",cap:"Kindertorte"}},
+ it:{
+  mother:{eyebrow:"Festa della mamma · {date}",h1:"Una torta per la mamma<br><em>nel suo giorno</em>",sub:"Torte delicate con fiori e frutti di bosco, bento e dessert per dire grazie alla mamma. Consegna da Nessebar a Burgas.",pill:"Torte per la mamma — guarda la selezione →",cap:"Torta con peonie per la mamma"},
+  ny:{eyebrow:"Collezione di Capodanno",h1:"Una torta per Capodanno<br><em>e Natale</em>",sub:"Torte e dessert per la tavola delle feste e da regalare. Ordini per Capodanno entro il 28 dicembre.",pill:"Torte di Capodanno — ordini entro il 28 dicembre",cap:"Torta invernale"},
+  valentine:{eyebrow:"San Valentino · {date}",h1:"Una torta per due<br><em>per San Valentino</em>",sub:"Bento a cuore per due, coppie di bento e torte con la vostra dedica. Consegna da Nessebar a Burgas.",pill:"Per gli innamorati — guarda la selezione →",cap:"Torta a cuore"},
+  women:{eyebrow:"8 marzo · Festa della donna",h1:"Una torta per l'8 marzo<br><em>per le donne che ami</em>",sub:"Per la mamma, la moglie, le amiche e le colleghe: torte con fiori, bento e set di dessert. Ordinate per tempo: prima della festa c'è molta richiesta.",pill:"Selezione per l'8 marzo →",cap:"Torta con rose"},
+  easter:{eyebrow:"Pasqua · {date}",h1:"Dolci per<br><em>la tavola di Pasqua</em>",sub:"Torte e dessert per la tavola delle feste e da portare in visita. Consegna da Nessebar a Burgas.",pill:"Selezione per Pasqua →",cap:"Torta primaverile"},
+  kids:{eyebrow:"Giornata dei bambini · {date}",h1:"Una torta per i bambini<br><em>nella loro giornata</em>",sub:"Torte con i personaggi preferiti e i numeri, bento e set di cupcake per la festa dei bambini. Consegna da Nessebar a Burgas.",pill:"Torte per bambini →",cap:"Torta per bambini"}},
+ ua:{
+  mother:{eyebrow:"День матері · {date}",h1:"Торт для мами<br><em>до її дня</em>",sub:"Ніжні торти з квітами та ягодами, бенто й десерти, щоб сказати мамі «дякую». Доставка від Несебра до Бургаса.",pill:"Добірка тортів для мами →",cap:"Торт з півоніями для мами"},
+  ny:{eyebrow:"Новорічна колекція",h1:"Торт на Новий рік<br><em>і Різдво</em>",sub:"Торти й десерти до святкового столу та на подарунок. Новорічні замовлення приймаємо до 28 грудня.",pill:"Новорічні торти — замовлення до 28 грудня",cap:"Зимовий торт"},
+  valentine:{eyebrow:"День закоханих · {date}",h1:"Торт для двох<br><em>до Дня закоханих</em>",sub:"Бенто-серце на двох, парні бенто й торти з написом для коханої людини. Доставка від Несебра до Бургаса.",pill:"Добірка для закоханих →",cap:"Торт-серце"},
+  women:{eyebrow:"8 Березня",h1:"Торт до 8 Березня<br><em>для коханих жінок</em>",sub:"Для мами, дружини, подруги й колег: торти з квітами, бенто та набори десертів. Замовляйте заздалегідь: перед святом багато замовлень.",pill:"Добірка до 8 Березня →",cap:"Торт з трояндами"},
+  easter:{eyebrow:"Великдень · {date}",h1:"Солодкий стіл<br><em>до Великодня</em>",sub:"Торти й десерти до святкового столу та в гості. Доставка від Несебра до Бургаса.",pill:"Торти до Великодня →",cap:"Весняний торт"},
+  kids:{eyebrow:"День захисту дітей · {date}",h1:"Торт для дитини<br><em>до Дня захисту дітей</em>",sub:"Торти з улюбленими героями та цифрами, бенто й набори капкейків для дитячого свята. Доставка від Несебра до Бургаса.",pill:"Дитячі торти →",cap:"Дитячий торт"}}
+};
+const HOLIDAY = activeHoliday();
+if(HOLIDAY) Object.keys(HOL_TXT).forEach(l=>{ const T=HOL_TXT[l][HOLIDAY.text]; if(!T||!I18N[l]) return;
+  const dt=new Intl.DateTimeFormat(HTML_LANG[l]||l,{day:"numeric",month:"long"}).format(HOLIDAY.day);
+  const f=s=>s.replace(/\{date\}/g,dt);
+  Object.assign(I18N[l],{hero_eyebrow:f(T.eyebrow),hero_h1:f(T.h1),hero_sub:f(T.sub),hol_pill:f(T.pill),hol_cap:f(T.cap)}); });
 const cat = {who:"q_all", style:"q_any", q:"", shown:24, page:24};
 /* муссовые мини-торты и новогодние позиции из старого меню — тоже в каталоге */
 const CAT_ITEMS = CATALOG.concat(MENU.filter(p=>p.cat==="mousse"&&p.photo).map(p=>{ const tg=p.cat==="ny"?["winter","bday"]:["woman","friends","bday","berries"];
@@ -2725,7 +2812,7 @@ function showPhotoModal(){ const pics=[hasD("d_print")&&state.print?[state.print
 /* =========================================================
    7. СОБЫТИЯ
    ========================================================= */
-function setLang(l){ lang=l; store.set("vc_lang",l); renderStatic(); renderDelivery(); renderMenu(); renderBuilder(); tickCountdown(); if(typeof tgMainButton==="function") tgMainButton(); }
+function setLang(l){ lang=l; store.set("vc_lang",l); renderStatic(); renderHero(); $("#heroCake").classList.add("inview"); renderDelivery(); renderMenu(); renderBuilder(); tickCountdown(); if(typeof tgMainButton==="function") tgMainButton(); }
 function setGuests(g){ g=Math.min(GUESTS.max,Math.max(GUESTS.min,g)); if(g===state.guests) return;
   const before=[state.size,state.tiers].join(); state.guests=g; recalcCake(); syncActive();
   updatePreview(before!==[state.size,state.tiers].join()?"full":"none"); }
@@ -2746,6 +2833,8 @@ function pickOption(k,v){
   if(changed) updatePreview({shape:"full",tiers:"full",filling:"deco",sponge:"cut",textPos:"none"}[k]||"fade");
 }
 document.addEventListener("click",async e=>{
+  /* праздник: плашка и фото на главном экране открывают подборку к празднику */
+  if(HOLIDAY && e.target.closest("#nyPill,[data-hol]")){ e.preventDefault(); catSet({style:HOLIDAY.style,who:HOLIDAY.who,q:""}); $("#catQ").value=""; $("#catCount").scrollIntoView({behavior:"smooth",block:"start"}); return; }
   const s=e.target.closest("[data-scroll]"); if(s){ e.preventDefault(); document.getElementById(s.dataset.scroll).scrollIntoView({behavior:"smooth"}); return; }
   const l=e.target.closest("[data-lang]"); if(l){ setLang(l.dataset.lang); return; }
   const c=e.target.closest("[data-city]"); if(c){ selectCity(c.dataset.city); return; }
@@ -2756,6 +2845,7 @@ document.addEventListener("click",async e=>{
   const cc=e.target.closest("[data-cid]"); if(cc){ openCat(cc.dataset.cid); return; }
   if(e.target.closest("#catReset")){ catSet({who:"q_all",style:"q_any",q:""}); $("#catQ").value=""; return; }
   if(e.target.closest("#catMore")){ cat.shown+=cat.page; renderCatGrid(); return; }
+  if(HOLIDAY && e.target.closest("#nyPill,[data-hol]")){ catSet({style:HOLIDAY.style,who:HOLIDAY.who,q:""}); $("#catQ").value=""; $("#catCount").scrollIntoView({behavior:"smooth",block:"start"}); return; }
   if(e.target.closest("#nyCta,#nyPill")){ catSet({style:"q_any",who:"q_all",q:""}); document.getElementById("menu").scrollIntoView({behavior:"smooth"}); return; }
   const o=e.target.closest("[data-order]"); if(o){ openOrder(o.dataset.order); return; }
   /* разрез: клик по торту или по кнопке «Разрезать» */
