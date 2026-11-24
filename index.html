@@ -435,12 +435,14 @@ body.lock{overflow:hidden}
 .buns{margin-top:72px;scroll-margin-top:90px}
 .buns-head h3{font-family:"Playfair Display",serif;font-weight:500;font-size:clamp(28px,3.4vw,40px);margin:6px 0 8px}
 .buns-head .lead{margin-bottom:26px}
-.buns-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.buns-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:980px}
 .bun{background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;display:flex;flex-direction:column}
 .bun .ph{aspect-ratio:1/1;background:var(--plate);overflow:hidden;position:relative}
 .bun .ph img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s var(--ease)}
 .bun:hover .ph img{transform:scale(1.04)}
 .bun .ph.none{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;background:linear-gradient(160deg,#f3d9d3,#e7b3ab);color:#8e2a35;font-family:"Playfair Display",serif;font-style:italic;font-size:20px;text-align:center;padding:20px}
+.bun .ph.art svg{width:100%;height:100%;display:block;transition:transform .6s var(--ease)}
+.bun:hover .ph.art svg{transform:scale(1.04)}
 [data-theme="night"] .bun .ph.none{background:linear-gradient(160deg,#2b1d1d,#3d2224);color:#e9a3ab}
 .bun .bd{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
 .bun h4{font-family:"Playfair Display",serif;font-weight:500;font-size:19px;margin:0;line-height:1.25}
@@ -2370,6 +2372,37 @@ const I18N_BUNS = {
   bun_cherry:"З вишнею",bun_cherry_d:"Здобна булочка з вишневою начинкою."}
 };
 Object.keys(I18N_BUNS).forEach(l=>Object.assign(I18N[l],I18N_BUNS[l]));
+const I18N_BUNS2 = {
+ ru:{bun_apple:"С яблоком",bun_apple_d:"Сдобная булочка с яблочной начинкой.",bun_vatrushka:"Ватрушка с творогом",bun_vatrushka_d:"Сдобная ватрушка с нежной творожной начинкой."},
+ en:{bun_apple:"Apple",bun_apple_d:"Soft bun with apple filling.",bun_vatrushka:"Cottage cheese vatrushka",bun_vatrushka_d:"Soft round bun with a gentle sweet cottage cheese filling."},
+ bg:{bun_apple:"С ябълка",bun_apple_d:"Мека кифличка с ябълков пълнеж.",bun_vatrushka:"Ватрушка с извара",bun_vatrushka_d:"Мека ватрушка с нежна плънка от извара."},
+ ch:{bun_apple:"Apfel",bun_apple_d:"Weiches Brötchen mit Apfelfüllung.",bun_vatrushka:"Watruschka mit Quark",bun_vatrushka_d:"Weiches rundes Hefegebäck mit zarter Quarkfüllung."},
+ it:{bun_apple:"Mela",bun_apple_d:"Panino morbido ripieno di mele.",bun_vatrushka:"Vatrushka al formaggio fresco",bun_vatrushka_d:"Panino tondo e morbido con delicato ripieno dolce di formaggio fresco."},
+ ua:{bun_apple:"З яблуком",bun_apple_d:"Здобна булочка з яблучною начинкою.",bun_vatrushka:"Ватрушка з сиром",bun_vatrushka_d:"Здобна ватрушка з ніжною сирною начинкою."}
+};
+Object.keys(I18N_BUNS2).forEach(l=>Object.assign(I18N[l],I18N_BUNS2[l]));
+/* рисунок булочки, пока нет фото (viewBox 200×200) */
+function bunArt(kind){
+  const p="bn"+kind; ARTN=0; const rn=mkRng(kind.length*13);
+  let s=`<defs><radialGradient id="${p}d" cx=".42" cy=".3" r=".8"><stop offset="0" stop-color="#f6c983"/><stop offset=".55" stop-color="#d9934a"/><stop offset="1" stop-color="#a8642a"/></radialGradient>
+    <radialGradient id="${p}bg" cx=".5" cy=".35" r=".8"><stop offset="0" stop-color="#fff8ef"/><stop offset="1" stop-color="#f1e1cc"/></radialGradient></defs>
+    <rect width="200" height="200" fill="url(#${p}bg)"/><ellipse cx="100" cy="150" rx="78" ry="20" fill="#000" opacity=".1"/><ellipse cx="100" cy="144" rx="80" ry="22" fill="#fffaf3" stroke="#e8d9c4" stroke-width="2"/>`;
+  const bun=(cx,cy,rx,ry)=>`<ellipse cx="${cx}" cy="${cy+6}" rx="${rx}" ry="${ry*.9}" fill="#9b5a24" opacity=".35"/><ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="url(#${p}d)"/><path d="M${cx-rx*.6} ${cy-ry*.55}Q${cx-rx*.1} ${cy-ry*1.02} ${cx+rx*.45} ${cy-ry*.7}" stroke="#fff3dc" stroke-opacity=".55" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+  const sugar=(n,cx,cy,rx,ry)=>{ let o=""; for(let k=0;k<n;k++){ const a=rn()*6.28, r=Math.sqrt(rn()); o+=`<circle cx="${f1(cx+Math.cos(a)*rx*r)}" cy="${f1(cy+Math.sin(a)*ry*r)}" r="${f1(.8+rn()*1.2)}" fill="#fff" opacity=".85"/>`; } return o; };
+  if(kind==="vatrushka"){
+    s+=bun(100,112,62,34)+`<ellipse cx="100" cy="106" rx="36" ry="18" fill="#c27a35"/><ellipse cx="100" cy="104" rx="32" ry="15" fill="#fbf4e4"/><ellipse cx="92" cy="99" rx="12" ry="5" fill="#fff" opacity=".8"/>`;
+    for(let k=0;k<14;k++) s+=`<circle cx="${f1(76+rn()*48)}" cy="${f1(96+rn()*16)}" r="${f1(1+rn()*1.2)}" fill="#efe2c6"/>`;
+    s+=`<ellipse cx="108" cy="108" rx="6" ry="3" fill="#e9b15a" opacity=".5"/>`;
+  } else if(kind==="apple"){
+    s+=bun(100,112,64,36);
+    [[80,98,-25],[98,92,0],[117,97,25],[89,110,-10],[110,110,12]].forEach(([x,y,r])=>{ s+=`<g transform="rotate(${r} ${x} ${y})"><path d="M${x-13} ${y}Q${x} ${y-13} ${x+13} ${y}Q${x} ${y-5} ${x-13} ${y}Z" fill="#f7e3a6"/><path d="M${x-13} ${y}Q${x} ${y-13} ${x+13} ${y}" stroke="#c0392b" stroke-width="2.6" fill="none"/></g>`; });
+    s+=sugar(40,100,104,46,20)+`<path d="M138 82q10 -6 14 4" stroke="#6a8f3a" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="146" cy="80" rx="7" ry="4" fill="#7da544" transform="rotate(-25 146 80)"/>`;
+  } else { /* cherry */
+    s+=bun(100,112,62,34)+`<ellipse cx="100" cy="106" rx="34" ry="17" fill="#c27a35"/><ellipse cx="100" cy="104" rx="30" ry="14" fill="#7a1328"/><ellipse cx="92" cy="100" rx="10" ry="4" fill="#d2546b" opacity=".6"/>`;
+    s+=`<g>${artDefs(p)}${cherry(p,90,100,9,2)}${cherry(p,112,103,8,-3)}</g>`+sugar(26,100,118,56,22);
+  }
+  return `<svg viewBox="22 30 156 156" aria-hidden="true">${s}</svg>`;
+}
 /* цвета покрытия (расширенная палитра) */
 const I18N_COL = {
  ru:{col_white:"Белый",col_ivory:"Слоновая кость",col_lemon:"Лимонный",col_peach:"Персиковый",col_blush:"Пудровая роза",col_pink:"Розовый",col_coral:"Коралловый",col_ruby:"Рубиновый",col_berry:"Ягодный",col_lilac:"Лавандовый",col_purple:"Фиолетовый",col_sky:"Небесно-голубой",col_navy:"Тёмно-синий",col_mint:"Мятный",col_sage:"Шалфей",col_emerald:"Изумрудный",col_caramel:"Карамельный",col_choc:"Горький шоколад",col_noir:"Чёрный графит",color_more:"Нужен другой оттенок? Напишите его в пожеланиях — у Анжелики много красок."},
@@ -2615,7 +2648,9 @@ const BUNS = [
   {id:"bun_poppy_choc", price:2.5, photo:"img/bake/mak-shokolad.jpg"},
   {id:"bun_poppy_sugar", price:2,  photo:"img/bake/mak-pudra.jpg"},
   {id:"bun_cinnamon",   price:1.5, photo:"img/bake/koritsa.jpg"},
-  {id:"bun_cherry",     price:2,   photo:""}
+  {id:"bun_cherry",     price:2,   photo:"", art:"cherry"},
+  {id:"bun_apple",      price:2,   photo:"", art:"apple"},
+  {id:"bun_vatrushka",  price:2,   photo:"", art:"vatrushka"}
 ];
 const bunQty = {};
 const bunPrice = (eur,l=lang)=> l==="ch" ? "CHF "+(eur*CONFIG.chfRate).toFixed(2) : (l==="en" ? "€"+String(eur).replace(/\.(\d)$/,".$10") : String(eur).replace(".",",")+" €");
@@ -2625,7 +2660,7 @@ function renderBake(){
   const g=$("#bunsGrid"); if(!g) return;
   g.innerHTML=BUNS.map(b=>{ const n=bunQty[b.id]||BUN_MIN;
     return `<article class="bun" data-bun="${b.id}">
-      ${b.photo?`<div class="ph"><img src="${b.photo}" alt="${esc(t(b.id))}" loading="lazy"></div>`:`<div class="ph none">${esc(t(b.id))}<small style="font-size:13px;opacity:.7;font-style:normal;font-family:Inter,sans-serif">${t("buns_nophoto")}</small></div>`}
+      ${b.photo?`<div class="ph"><img src="${b.photo}" alt="${esc(t(b.id))}" loading="lazy"></div>`:b.art?`<div class="ph art">${bunArt(b.art)}</div>`:`<div class="ph none">${esc(t(b.id))}<small style="font-size:13px;opacity:.7;font-style:normal;font-family:Inter,sans-serif">${t("buns_nophoto")}</small></div>`}
       <div class="bd"><h4>${esc(t(b.id))}</h4><p>${esc(t(b.id+"_d"))}</p>
         <div class="pr"><b>${bunPrice(b.price)}</b><span>${t("buns_each")}</span></div>
         <div class="qty"><button type="button" data-d="-1" ${n<=BUN_MIN?"disabled":""} aria-label="−">−</button><span>${n} ${t("pcs")} · ${bunPrice(Math.round(b.price*n*100)/100)}</span><button type="button" data-d="1" aria-label="+">+</button></div>
