@@ -2586,8 +2586,33 @@ function renderMenu(){
   $("#catStyle").innerHTML=Object.keys(CAT_STYLE).map(k=>`<button type="button" class="chip${cat.style===k?" on":""}${k==="q_island"?" star":""}" data-cstyle="${k}">${t(k)}${k!=="q_any"?` <sup>${cnt(CAT_STYLE[k])}</sup>`:""}</button>`).join("");
   renderCatGrid(); renderFlavors(); renderBake();
 }
+/* Без фильтров — работы вперемешку по видам (по кругу), чтобы с первых рядов был виден весь выбор */
+const CAT_MIX_ORDER=["flowers","island","bento","wedding","number","christ","chars","desserts","jelly","darkgold","kids","cake"];
+function catGroup(p){
+  if(p.type==="island") return "island";
+  if(p.has("wedding","anniv")) return "wedding";
+  if(p.has("christ","gender")) return "christ";
+  if(p.type==="number") return "number";
+  if(p.type==="bento"||p.type==="bento2") return "bento";
+  if(p.type==="jelly") return "jelly";
+  if(p.type==="desserts"||p.type==="mousse") return "desserts";
+  if(p.has("chars","superhero","games")) return "chars";
+  if(p.has("flowers")) return "flowers";
+  if(p.has("darkgold")) return "darkgold";
+  if(p.has("kid","girl","boy","baby")) return "kids";
+  return "cake";
+}
+let CAT_MIXED=null;
+function catMix(items){
+  if(CAT_MIXED&&CAT_MIXED.length===items.length) return CAT_MIXED;
+  const g={}; items.forEach(p=>{ const k=catGroup(p); (g[k]=g[k]||[]).push(p); });
+  const out=[]; let left=true;
+  while(left){ left=false; CAT_MIX_ORDER.forEach(k=>{ if(g[k]&&g[k].length){ out.push(g[k].shift()); left=true; } }); }
+  return CAT_MIXED=out;
+}
 function renderCatGrid(){
-  const list=CAT_ITEMS.filter(catMatches).sort((a,b)=>CAT_PRIO(a)-CAT_PRIO(b));
+  const all=cat.who==="q_all"&&cat.style==="q_any"&&!cat.q;
+  const list= all ? catMix(CAT_ITEMS) : CAT_ITEMS.filter(catMatches).sort((a,b)=>CAT_PRIO(a)-CAT_PRIO(b));
   $("#catCount").innerHTML=t("cat_found").replace("{n}",list.length)+(cat.who!=="q_all"||cat.style!=="q_any"||cat.q?` · <button type="button" class="linkbtn" id="catReset">${t("cat_reset")}</button>`:"");
   $("#products").innerHTML= list.length ? list.slice(0,cat.shown).map(catCard).join("") : `<p class="catempty">${t("cat_empty")}</p>`;
   const more=$("#catMore"); more.hidden=list.length<=cat.shown; more.textContent=`${t("cat_more")} (${list.length-cat.shown})`;
