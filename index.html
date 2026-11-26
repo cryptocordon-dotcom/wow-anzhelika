@@ -321,6 +321,13 @@ body.lock{overflow:hidden}
 .flav{display:flex;flex-direction:column;align-items:center;gap:9px;background:none;border:0;cursor:pointer;color:var(--text);font-size:12.5px;line-height:1.3;text-align:center;padding:4px}
 .flav i{width:72px;height:72px;border-radius:50%;background-size:cover;background-position:center;border:2px solid transparent;box-shadow:0 0 0 1px var(--line);transition:all .4s ease}
 .flav:hover i{transform:scale(1.05)}
+.flav i img{width:100%;height:100%;object-fit:cover;display:block}
+.flavs .flav.more{display:none}
+.flavs.open .flav.more{display:flex;animation:fadein0 .4s ease}
+.flav i.flcustom{display:grid!important;place-items:center;color:var(--accent);background:var(--card)!important;border:1.5px dashed color-mix(in srgb,var(--accent) 55%,transparent)}
+.flav i.flcustom svg{width:30px!important;height:30px!important}
+.minput.spcustom{width:100%;margin:12px 0 4px}
+.fillmore{display:block;margin:12px auto 0;font-size:13px}
 .flav.on i{border-color:var(--card);box-shadow:0 0 0 2px var(--accent),0 12px 26px -12px var(--accent)}
 /* живые картинки вкусов */
 .flav i{display:block;width:84px;height:84px;background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--fc) 22%,var(--card)),color-mix(in srgb,var(--fc) 8%,var(--card)) 70%);overflow:hidden;position:relative}
@@ -897,6 +904,24 @@ nav.main a.on{color:var(--accent)}
 .dr-foot{margin-top:auto;padding:16px 6px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
 .dr-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .dr-row .theme .tl{display:inline!important}
+/* ---------- Конструктор: «фотостудия» вокруг торта — мягкий свет, стол и боке ---------- */
+.stage .canvas{--key:rgba(255,255,255,.85);--tbl1:rgba(226,206,186,.0);--tbl2:rgba(214,190,166,.38);--bk:255,214,160;
+  background:
+    radial-gradient(ellipse 58% 40% at 50% 36%,var(--key),transparent 72%),
+    radial-gradient(circle at 50% 42%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 68%),
+    linear-gradient(to bottom,transparent 57%,var(--tbl1) 57%,var(--tbl2) 100%)}
+[data-theme="night"] .stage .canvas{--key:rgba(255,226,180,.10);--tbl1:rgba(0,0,0,0);--tbl2:rgba(0,0,0,.28);--bk:243,205,140}
+.stage .canvas::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:inherit;
+  background:
+    radial-gradient(circle at 13% 20%,rgba(var(--bk),.45) 0 2.4%,transparent 3.4%),
+    radial-gradient(circle at 86% 14%,rgba(var(--bk),.35) 0 3.2%,transparent 4.4%),
+    radial-gradient(circle at 78% 34%,rgba(var(--bk),.25) 0 1.6%,transparent 2.4%),
+    radial-gradient(circle at 22% 42%,rgba(var(--bk),.22) 0 1.3%,transparent 2.1%),
+    radial-gradient(circle at 92% 46%,rgba(var(--bk),.2) 0 2%,transparent 3%),
+    radial-gradient(circle at 6% 52%,rgba(var(--bk),.18) 0 2.6%,transparent 3.8%);
+  filter:blur(2.5px);animation:bokeh 16s ease-in-out infinite alternate}
+@keyframes bokeh{0%{transform:translate(0,0);opacity:.55}50%{opacity:1}100%{transform:translate(-14px,8px);opacity:.7}}
+@media (prefers-reduced-motion:reduce){.stage .canvas::before{animation:none}}
 .dr-lbl{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
 </style>
 </head>
@@ -1900,7 +1925,8 @@ const OPTS = {
  shape:["round","square","heart"],
  size:["size_bento","size_std","size_party"],
  sponge:[{id:"sp_choc",c:"#4A2C20"},{id:"sp_van",c:"#EED9A6"},{id:"sp_mousse",c:"#8A5A44"}],
- filling:[{id:"f_cherry",c:"#8E1B2E"},{id:"f_caramel",c:"#C68642"},{id:"f_rasp",c:"#C2304F"},{id:"f_mango",c:"#F2A83B"}],
+ /* начинки — те же, что в разделе «Начинки» на сайте (остров и чизкейк — это виды тортов, их здесь нет) */
+ filling:FLAVORS.filter(f=>!["fl_island","fl_cheese"].includes(f.id)).map(f=>({id:f.id,c:f.c,photo:f.photo||""})),
  coating:["c_velour","c_mirror","c_cream"],
  colors:[{id:"col_ruby",c:"#8E1630"},{id:"col_ivory",c:"#F6EBDD"},{id:"col_blush",c:"#EDB7B3"},{id:"col_berry",c:"#A82C48"},{id:"col_caramel",c:"#C98A4B"},{id:"col_choc",c:"#4A2A1E"},{id:"col_noir",c:"#1E1416"},
    {id:"col_white",c:"#FBF8F3"},{id:"col_lemon",c:"#F3D96A"},{id:"col_peach",c:"#F4C09C"},{id:"col_pink",c:"#EC8DB0"},{id:"col_coral",c:"#EA7565"},
@@ -1908,7 +1934,40 @@ const OPTS = {
 };
 const colorHex = id => (OPTS.colors.find(c=>c.id===id)||OPTS.colors[0]).c;
 const spongeHex = id => (OPTS.sponge.find(c=>c.id===id)||OPTS.sponge[0]).c;
-const fillHex = id => (OPTS.filling.find(c=>c.id===id)||OPTS.filling[0]).c;
+/* старые «рисованные» начинки (f_*) остались у готовых тортов меню; новые начинки берут их украшение сверху */
+const FILL_OLD = {f_cherry:"#8E1B2E",f_caramel:"#C68642",f_rasp:"#C2304F",f_mango:"#F2A83B"};
+const FILL_LOOK = {fl_cherry_choc:"f_cherry",fl_caramel:"f_caramel",fl_snickers:"f_caramel",fl_bueno:"f_caramel",fl_peanut:"f_caramel",fl_honey:"f_caramel",fl_napoleon:"f_caramel",fl_choc_nut:"f_caramel",fl_mango:"f_mango",fl_jelly:"f_mango",fl_lemon:"f_mango"};
+const FILL_FROM_OLD = {f_cherry:"fl_cherry_choc",f_caramel:"fl_caramel",f_mango:"fl_mango",f_rasp:"fl_berry"};
+/* список начинок: сначала FILL_SHOW штук, остальные — по кнопке «Показать все» */
+const FILL_SHOW = 8;
+let fillOpen = false;
+const PENCIL_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 7l3 3"/></svg>';
+function fillSync(){
+  const box=document.getElementById("fillFlavs"), btn=document.getElementById("fillMore"); if(!box||!btn) return;
+  box.classList.toggle("open",fillOpen);
+  box.querySelectorAll(".flav").forEach((b,i)=>b.classList.toggle("more",i>=FILL_SHOW && b.dataset.v!==state.filling && b.dataset.v!=="fill_custom"));   /* выбранная начинка и «Свой вариант» видны всегда */
+  const fi=document.getElementById("fFill"); if(fi) fi.hidden=state.filling!=="fill_custom";
+  btn.innerHTML=fillOpen?t("fill_less")+" ↑":t("fill_more").replace("{n}",OPTS.filling.length)+" ↓";
+  const sp=document.getElementById("fSponge"); if(sp) sp.hidden=state.sponge!=="sp_custom";
+}
+document.addEventListener("click",e=>{
+  if(e.target.closest("[data-fillmore]")){ fillOpen=!fillOpen; fillSync(); if(!fillOpen) document.getElementById("fillFlavs").scrollIntoView({behavior:"smooth",block:"nearest"}); return; }
+  if(e.target.closest('#steps [data-g="filling"]')) setTimeout(()=>{ fillSync(); const fi=document.getElementById("fFill"); if(fi&&!fi.hidden) fi.focus(); },0);
+  if(e.target.closest('#steps [data-g="sponge"]')) setTimeout(()=>{ fillSync(); const sp=document.getElementById("fSponge"); if(sp&&!sp.hidden) sp.focus(); },0);
+});
+document.addEventListener("input",e=>{ if(e.target.id==="fSponge"){ state.spongeCustom=e.target.value; updateSend(); } if(e.target.id==="fFill"){ state.fillCustom=e.target.value; updateSend(); } });
+{ const _rb=renderBuilder; renderBuilder=function(){ _rb.apply(this,arguments); fillSync(); }; }
+const I18N_FILL = {
+ ru:{fill_more:"Показать все начинки ({n})",fill_less:"Свернуть список",sp_custom:"Свой вариант",sp_custom_ph:"Какую основу хотите? Например: медовые коржи",desc_sp_custom:"Напишите свою основу — Анжелика сделает или подскажет похожую.",fill_custom_ph:"Какую начинку хотите? Например: шоколад и апельсин",desc_fill_custom:"Напишите свою начинку — Анжелика сделает или подскажет похожую."},
+ en:{fill_more:"Show all fillings ({n})",fill_less:"Show fewer",sp_custom:"Your own",sp_custom_ph:"Which base would you like? E.g. honey layers",desc_sp_custom:"Write the base you want — Angelika will make it or suggest a similar one.",fill_custom_ph:"Which filling would you like? E.g. chocolate and orange",desc_fill_custom:"Write the filling you want — Angelika will make it or suggest a similar one."},
+ bg:{fill_more:"Покажи всички плънки ({n})",fill_less:"Скрий списъка",sp_custom:"Ваш вариант",sp_custom_ph:"Каква основа искате? Например: медени блатове",desc_sp_custom:"Напишете своята основа — Анжелика ще я направи или ще предложи подобна.",fill_custom_ph:"Каква плънка искате? Например: шоколад и портокал",desc_fill_custom:"Напишете своята плънка — Анжелика ще я направи или ще предложи подобна."},
+ ch:{fill_more:"Alle Füllungen zeigen ({n})",fill_less:"Weniger zeigen",sp_custom:"Eigener Wunsch",sp_custom_ph:"Welche Basis möchten Sie? Z. B. Honigböden",desc_sp_custom:"Schreiben Sie Ihre Wunschbasis — Angelika macht sie oder schlägt eine ähnliche vor.",fill_custom_ph:"Welche Füllung möchten Sie? Z. B. Schokolade und Orange",desc_fill_custom:"Schreiben Sie Ihre Wunschfüllung — Angelika macht sie oder schlägt eine ähnliche vor."},
+ it:{fill_more:"Mostra tutti i ripieni ({n})",fill_less:"Mostra meno",sp_custom:"La vostra idea",sp_custom_ph:"Quale base desiderate? Es.: strati al miele",desc_sp_custom:"Scrivete la base che desiderate: Angelika la prepara o ne propone una simile.",fill_custom_ph:"Quale ripieno desiderate? Es.: cioccolato e arancia",desc_fill_custom:"Scrivete il ripieno che desiderate: Angelika lo prepara o ne propone uno simile."},
+ ua:{fill_more:"Показати всі начинки ({n})",fill_less:"Згорнути список",sp_custom:"Свій варіант",sp_custom_ph:"Яку основу бажаєте? Наприклад: медові коржі",desc_sp_custom:"Напишіть свою основу — Анжеліка зробить або порадить схожу.",fill_custom_ph:"Яку начинку бажаєте? Наприклад: шоколад і апельсин",desc_fill_custom:"Напишіть свою начинку — Анжеліка зробить або порадить схожу."}
+};
+Object.keys(I18N_FILL).forEach(l=>{ if(I18N[l]) Object.assign(I18N[l],I18N_FILL[l],{fill_custom:I18N_FILL[l].sp_custom}); });
+const fillLook = id => FILL_OLD[id] ? id : (FILL_LOOK[id]||"f_rasp");
+const fillHex = id => (OPTS.filling.find(c=>c.id===id)||{c:FILL_OLD[id]||"#C2304F"}).c;
 
 /* =========================================================
    4. СОСТОЯНИЕ И УТИЛИТЫ
@@ -1916,7 +1975,7 @@ const fillHex = id => (OPTS.filling.find(c=>c.id===id)||OPTS.filling[0]).c;
 const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 let lang = (()=>{const s=store.get("vc_lang");if(LANGS.includes(s))return s;const n=(navigator.language||"ru").toLowerCase();
   if(n.startsWith("de-ch")||n==="de")return "ch";if(n.startsWith("uk"))return "ua";if(n.startsWith("bg"))return "bg";if(n.startsWith("it"))return "it";if(n.startsWith("en"))return "en";return "ru";})();
-const state = {occasion:"",guests:8,shape:"round",size:1,tiers:1,sponge:"sp_choc",filling:"f_rasp",coating:"c_velour",color:"col_blush",decor:[],print:null,cut:false,
+const state = {occasion:"",guests:8,shape:"round",size:1,tiers:1,sponge:"sp_choc",filling:"fl_berry",spongeCustom:"",fillCustom:"",coating:"c_cream",color:"col_ivory",decor:[],print:null,cut:false,
   text:"",textPos:"side",candle:"",custom:"",photo:null,date:"",city:"",name:"",contact:"",msgr:"wa",step:1,reached:1};
 /* Гости → вес → тип торта. ≈150 г на человека; бенто — для 2–3 человек */
 const BUILD = {kgMax:10, gPerGuest:150, bentoMax:3, stdMaxKg:2.4, minStdKg:1.2, tier2From:16, tier3From:30, maxDecor:3,
@@ -1964,6 +2023,19 @@ function shapeD(s,cx,cy,w,h){
   const X=v=>f1(cx-w/2+v/100*w),Y=v=>f1(cy-h/2+(v-2)/86*h);
   let d=`M${X(50)} ${Y(88)}`; for(let i=1;i<HEART.length;i++){const p=HEART[i];d+=`C${X(p[0])} ${Y(p[1])} ${X(p[2])} ${Y(p[3])} ${X(p[4])} ${Y(p[5])}`;} return d+"Z";
 }
+/* n точек по контуру сердца (по часовой стрелке от нижнего кончика) — для розочек и бордюра */
+function heartPts(cx,cy,w,h,n){
+  const X=v=>cx-w/2+v/100*w, Y=v=>cy-h/2+(v-2)/86*h, segs=[]; let p0=HEART[0];
+  for(let i=1;i<HEART.length;i++){ const c=HEART[i]; segs.push([p0,[c[0],c[1]],[c[2],c[3]],[c[4],c[5]]]); p0=[c[4],c[5]]; }
+  const bz=(s,t)=>{ const m=1-t; return [0,1].map(k=>m*m*m*s[0][k]+3*m*m*t*s[1][k]+3*m*t*t*s[2][k]+t*t*t*s[3][k]); };
+  const fine=[]; segs.forEach(s=>{ for(let k=0;k<40;k++) fine.push(bz(s,k/40)); }); fine.push(fine[0]);
+  const len=[0]; for(let i=1;i<fine.length;i++) len.push(len[i-1]+Math.hypot(X(fine[i][0])-X(fine[i-1][0]),Y(fine[i][1])-Y(fine[i-1][1])));
+  const out=[], L=len[len.length-1]; let j=0;
+  for(let i=0;i<n;i++){ const d=i/n*L; while(len[j+1]<d) j++; const t=(d-len[j])/((len[j+1]-len[j])||1);
+    out.push([X(fine[j][0]+(fine[j+1][0]-fine[j][0])*t), Y(fine[j][1]+(fine[j+1][1]-fine[j][1])*t)]); }
+  return out; }
+/* передняя (видимая) часть контура сердца у основания яруса */
+const heartFront=(cx,y,w,h,n)=>heartPts(cx,y,w,h,Math.round(n*1.9)).filter(p=>p[1]>=y-h*.17).sort((a,b)=>a[0]-b[0]);
 function edgePt(s,cx,cy,w,h,u){ if(s==="square") return [cx-w/2+u*w, cy+h/2]; const a=Math.PI-u*Math.PI; return [cx+(w/2)*Math.cos(a)*(s==="heart"?.96:1), cy+(h/2)*Math.sin(a)*(s==="heart"?1.2:1)]; }
 const stopsS=st=>st.map(s=>`<stop offset="${s[0]}" stop-color="${s[1]}"${s[2]!=null?` stop-opacity="${s[2]}"`:""}/>`).join("");
 const lgU=(id,st,x1,y1,x2,y2)=>`<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${f1(x1)}" y1="${f1(y1)}" x2="${f1(x2)}" y2="${f1(y2)}">${stopsS(st)}</linearGradient>`;
@@ -1974,6 +2046,8 @@ function artDefs(p){ return `<defs>
 <filter id="${p}blur" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="7"/></filter>
 <filter id="${p}sp" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".34" numOctaves="2" seed="7" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.6 0 0 0 -1.28" result="a"/><feFlood flood-color="#2a1208" flood-opacity=".42"/><feComposite in2="a" operator="in" result="d"/><feComposite in="d" in2="SourceGraphic" operator="in" result="d2"/><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="d2"/></feMerge></filter>
 <filter id="${p}vel" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="1.5" numOctaves="2" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  .45 0 0 0 -.2" result="a"/><feComposite in="a" in2="SourceGraphic" operator="in" result="d"/><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="d"/></feMerge></filter>
+<filter id="${p}spl" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".008 .2" numOctaves="2" seed="3" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  2.4 0 0 0 -1.12" result="a"/><feComposite in="a" in2="SourceGraphic" operator="in"/></filter>
+<filter id="${p}spd" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".007 .16" numOctaves="2" seed="11" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 .32  0 0 0 0 .22  0 0 0 0 .16  -2.4 0 0 0 1.02" result="a"/><feComposite in="a" in2="SourceGraphic" operator="in"/></filter>
 <filter id="${p}ds" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="2" stdDeviation="1.6" flood-opacity=".32"/></filter>
 ${rgB(p+"por",[[0,"#ffffff"],[.72,"#f4eee8"],[1,"#d9cec4"]],.45,.35,.75)}
 ${rgB(p+"por2",[[0,"#d8ccc1"],[1,"#9f9187"]])}
@@ -2046,25 +2120,29 @@ function mushroom(p,x,y,r){ let s=`<path d="M${f1(x-r*.32)} ${f1(y)}L${f1(x-r*.2
   const rn=mkRng(x*7+y); for(let k=0;k<10;k++) s+=`<circle cx="${f1(x+(rn()-.5)*r*1.5)}" cy="${f1(y-r*1.3-rn()*r*.7)}" r="${f1(r*.05+rn()*r*.05)}" fill="#6b3b22" opacity=".55"/>`; return s; }
 
 /* ---------- состав торта в разрезе ---------- */
-function layersFor(cfg,color){ const sp=spongeHex(cfg.sponge), fl=fillHex(cfg.filling), fruit={f_cherry:"#5c0718",f_rasp:"#8e1430",f_mango:"#d9700c"}[cfg.filling]||null, cream="#f6ead8";
+function layersFor(cfg,color){ const sp=spongeHex(cfg.sponge), fl=fillHex(cfg.filling), fruit={f_cherry:"#5c0718",f_rasp:"#8e1430",f_mango:"#d9700c"}[fillLook(cfg.filling)]||null, cream="#f6ead8";
   return cfg.size===0 ? [{c:mix(color,-.04),f:.06},{c:sp,f:.38,sp:1},{c:fl,f:.14,fruit},{c:sp,f:.42,sp:1}]
                       : [{c:mix(color,-.04),f:.05},{c:sp,f:.25,sp:1},{c:cream,f:.05},{c:fl,f:.1,fruit},{c:sp,f:.24,sp:1},{c:fl,f:.1,fruit},{c:sp,f:.21,sp:1}]; }
 
 /* ---------- ярус торта ---------- */
 let ARTN=0;
 function tierArt(o){
-  const {p,shape,cx,bot,w,depth,color,finish}=o, h=w*(shape==="square"?.3:.34), top=bot-depth, rx=w/2, ry=h/2, id=p+"t"+(ARTN++), rnd=mkRng(o.seed||w*3+depth);
+  const {p,shape,cx,bot,w,depth,color,finish}=o, h=w*(shape==="square"?.3:shape==="heart"?.44:.34), top=bot-depth, rx=w/2, ry=h/2, id=p+"t"+(ARTN++), rnd=mkRng(o.seed||w*3+depth);
   const cut=!!o.cut&&shape==="round", A1=Math.PI/2-.62, A2=Math.PI/2+.4;
   const P=(a,y)=>[cx+rx*Math.cos(a), y+ry*Math.sin(a)];
   const st = finish==="c_mirror"? [[0,mix(color,-.58)],[.12,mix(color,-.26)],[.29,mix(color,.15)],[.35,mix(color,.78)],[.41,mix(color,.12)],[.7,mix(color,-.1)],[.9,mix(color,-.36)],[1,mix(color,-.62)]]
           : finish==="c_cream"? [[0,mix(color,-.26)],[.18,mix(color,-.05)],[.4,mix(color,.14)],[.62,mix(color,.05)],[.88,mix(color,-.12)],[1,mix(color,-.3)]]
           : [[0,mix(color,-.46)],[.2,mix(color,-.12)],[.42,mix(color,.1)],[.65,mix(color,-.03)],[1,mix(color,-.44)]];
-  let s=`<defs>${lgU(id+"s",st,cx-rx,0,cx+rx,0)}${rgB(id+"t",[[0,mix(color,finish==="c_mirror"?.42:.2)],[.65,mix(color,.02)],[1,mix(color,-.14)]],.4,.36,.8)}${rgB(id+"c",[[0,mix(color,.62)],[.55,mix(color,.1)],[1,mix(color,-.2)]],.35,.3,.8)}${finish==="c_mirror"?lgB(id+"d",[[0,mix(color,-.4)],[.35,mix(color,.4)],[.6,mix(color,.05)],[1,mix(color,-.45)]]):""}${o.drip?lgB(id+"cd",[[0,"#1c0d06"],[.35,"#7a4428"],[.55,"#3b1e10"],[1,"#1a0b05"]])+rgB(id+"ct",[[0,"#7a4428"],[.55,"#3b1e10"],[1,"#21100a"]],.4,.35,.8):""}</defs>`;
+  let s=`<defs>${lgU(id+"s",st,cx-rx,0,cx+rx,0)}${rgB(id+"t",[[0,mix(color,finish==="c_mirror"?.42:.2)],[.65,mix(color,.02)],[1,mix(color,-.14)]],.4,.36,.8)}${rgB(id+"c",[[0,mix(color,.42)],[.55,mix(color,.06)],[1,mix(color,-.2)]],.35,.3,.8)}${finish==="c_mirror"?lgB(id+"d",[[0,mix(color,-.4)],[.35,mix(color,.4)],[.6,mix(color,.05)],[1,mix(color,-.45)]]):""}${o.drip?lgB(id+"cd",[[0,"#1c0d06"],[.35,"#7a4428"],[.55,"#3b1e10"],[1,"#1a0b05"]])+rgB(id+"ct",[[0,"#7a4428"],[.55,"#3b1e10"],[1,"#21100a"]],.4,.35,.8):""}</defs>`;
   const seg=(a,b)=>{ const [x1,y1]=P(a,top),[x2,y2]=P(b,top),[x3,y3]=P(b,bot),[x4,y4]=P(a,bot); return `M${f1(x1)} ${f1(y1)}A${f1(rx)} ${f1(ry)} 0 0 1 ${f1(x2)} ${f1(y2)}L${f1(x3)} ${f1(y3)}A${f1(rx)} ${f1(ry)} 0 0 0 ${f1(x4)} ${f1(y4)}Z`; };
   let body="";
   if(shape==="round") body = cut? `<path d="${seg(0,A1)}"/><path d="${seg(A2,Math.PI)}"/>` : `<path d="${seg(0,Math.PI)}"/>`;
   else for(let y=bot;y>top;y-=2) body+=`<path d="${shapeD(shape,cx,y,w,h)}"/>`;
+  /* мягкая тень в месте, где ярус стоит на тарелке или на нижнем ярусе */
+  s+=`<ellipse cx="${f1(cx)}" cy="${f1(bot+ry*.12)}" rx="${f1(rx*1.03)}" ry="${f1(ry*1.08)}" fill="#2a160c" opacity=".2" filter="url(#${p}blur)"/>`;
   s+=`<g fill="url(#${id}s)"${finish==="c_velour"?` filter="url(#${p}vel)"`:""}>${body}</g>`;
+  /* фактура крема: лёгкие горизонтальные следы лопатки, как у настоящего торта */
+  if(finish!=="c_mirror") s+=`<g fill="#fff" filter="url(#${p}spl)" opacity="${finish==="c_velour"?.12:.26}">${body}</g><g fill="#fff" filter="url(#${p}spd)" opacity="${finish==="c_velour"?.06:.1}">${body}</g>`;
   /* срез: видны слои бисквита и начинки */
   if(cut){ const H=bot-top; const face=(a,dark)=>{ const [ex,ey]=P(a,top); let f="",acc=0;
       o.layers.forEach(L=>{ const a0=acc,a1=acc+L.f; acc=a1; f+=`<path d="M${f1(cx)} ${f1(top+H*a0)}L${f1(ex)} ${f1(ey+H*a0)}L${f1(ex)} ${f1(ey+H*a1+.7)}L${f1(cx)} ${f1(top+H*a1+.7)}Z" fill="${L.c}"${L.sp?` filter="url(#${p}sp)"`:""}/>`;
@@ -2080,24 +2158,31 @@ function tierArt(o){
   /* верх */
   let topD=shapeD(shape,cx,top,w,h); if(cut){ const [x2,y2]=P(A2,top),[x1,y1]=P(A1,top); topD=`M${f1(cx)} ${f1(top)}L${f1(x2)} ${f1(y2)}A${f1(rx)} ${f1(ry)} 0 1 1 ${f1(x1)} ${f1(y1)}Z`; }
   s+=`<path d="${topD}" fill="url(#${o.drip?id+"ct":id+"t"})"${finish==="c_velour"&&!o.drip?` filter="url(#${p}vel)"`:""}/>`;
+  /* верх: мягкий свет сверху-слева и светлый скруглённый край спереди */
+  if(finish!=="c_mirror"){ s+=`<defs>${rgB(id+"sh",[[0,"#fff",.34],[.6,"#fff",.06],[1,"#fff",0]],.34,.3,.7)}${lgU(id+"rim",[[0,"#fff",0],[.5,"#fff",0],[1,"#fff",.6]],0,top-ry,0,top+ry)}</defs><path d="${topD}" fill="url(#${id}sh)"/>`;
+    if(!cut) s+=`<path d="${topD}" fill="none" stroke="url(#${id}rim)" stroke-width="${f1(Math.max(1.6,w*.009))}"/>`; }
   if(finish==="c_mirror") s+=`<path d="${shapeD("round",cx-w*.14,top-h*.12,w*.42,h*.3)}" fill="#fff" opacity=".2"/><path d="${shapeD("round",cx+w*.2,top-h*.18,w*.12,h*.08)}" fill="#fff" opacity=".35"/>`;
   /* кремовые розочки по краю и бортик снизу */
   let back="",front="";
   if(finish==="c_cream"||o.rosettes){ const n=Math.max(10,Math.round(w/20)), r=w*.042, pts=[];
-    for(let i=0;i<n;i++){ const a=i/n*Math.PI*2+.1; if(cut&&a%(Math.PI*2)>A1-.15&&a%(Math.PI*2)<A2+.15) continue;
+    if(shape==="heart") heartPts(cx,top,w,h,n+4).forEach(([x,y])=>pts.push([cx+(x-cx)*.88,top+(y-top)*.84]));   /* по контуру сердца */
+    else for(let i=0;i<n;i++){ const a=i/n*Math.PI*2+.1; if(cut&&a%(Math.PI*2)>A1-.15&&a%(Math.PI*2)<A2+.15) continue;
       let x,y; if(shape==="square"){ const t=i/n, per=[[cx-w*.4,top-ry],[cx+w*.4,top-ry],[cx+w*.5,top+ry],[cx-w*.5,top+ry]]; const sgi=Math.floor(t*4), lt=t*4-sgi, A=per[sgi],B=per[(sgi+1)%4]; x=cx+(A[0]+(B[0]-A[0])*lt-cx)*.92; y=top+(A[1]+(B[1]-A[1])*lt-top)*.85; }
       else { const k=shape==="heart"?.86:.93; x=cx+rx*k*Math.cos(a); y=top+ry*k*Math.sin(a); } pts.push([x,y]); }
     pts.sort((a,b)=>a[1]-b[1]).forEach(([x,y])=>{ (y<top?back+=rosette(x,y,r,id+"c"):front+=rosette(x,y,r,id+"c")); });
-    for(let i=0;i<=Math.round(w/14);i++){ const u=i/Math.round(w/14); let x,y; if(shape==="round"){ const a=Math.PI-u*Math.PI; if(cut&&a>A1-.1&&a<A2+.1) continue; [x,y]=P(a,bot); } else [x,y]=edgePt(shape,cx,bot,w,h,u); front+=rosette(x,y-2,r*.72,id+"c"); } }
+    if(shape==="heart") heartFront(cx,bot,w,h,Math.round(w/14)).forEach(([x,y])=>front+=rosette(x,y-2,r*.72,id+"c"));
+    else for(let i=0;i<=Math.round(w/14);i++){ const u=i/Math.round(w/14); let x,y; if(shape==="round"){ const a=Math.PI-u*Math.PI; if(cut&&a>A1-.1&&a<A2+.1) continue; [x,y]=P(a,bot); } else [x,y]=edgePt(shape,cx,bot,w,h,u); front+=rosette(x,y-2,r*.72,id+"c"); } }
   /* объём боковой стенки: мягкий блик слева и тень к основанию */
   if(shape==="round"){ const side=cut?`<path d="${seg(0,A1)}"/><path d="${seg(A2,Math.PI)}"/>`:`<path d="${seg(0,Math.PI)}"/>`, k=finish==="c_mirror"?.0:finish==="c_velour"?.16:.22;
-    s=s.replace(/(<path d="[^"]*" fill="url\(#[^)]*t\)")/,`<defs>${lgU(id+"hl",[[0,"#fff",0],[.2,"#fff",0],[.3,"#fff",k],[.38,"#fff",0],[.78,"#fff",0],[.86,"#fff",k*.45],[.92,"#fff",0],[1,"#fff",0]],cx+rx,0,cx-rx,0)}${lgU(id+"ao",[[0,"#000",0],[.6,"#000",0],[1,"#000",.2]],0,top,0,bot+ry)}</defs><g fill="url(#${id}hl)">${side}</g><g fill="url(#${id}ao)">${side}</g>$1`); }
+    s=s.replace(/(<path d="[^"]*" fill="url\(#[^)]*t\)")/,`<defs>${lgU(id+"hl",[[0,"#fff",0],[.2,"#fff",0],[.3,"#fff",k],[.38,"#fff",0],[.78,"#fff",0],[.86,"#fff",k*.45],[.92,"#fff",0],[1,"#fff",0]],cx+rx,0,cx-rx,0).replace("</linearGradient>",`<animateTransform attributeName="gradientTransform" type="translate" values="${f1(-w*.07)} 0;${f1(w*.09)} 0;${f1(-w*.07)} 0" dur="11s" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1" repeatCount="indefinite"/></linearGradient>`)}${lgU(id+"ao",[[0,"#000",0],[.6,"#000",0],[1,"#000",.2]],0,top,0,bot+ry)}</defs><g fill="url(#${id}hl)">${side}</g><g fill="url(#${id}ao)">${side}</g>$1`); }
   /* жемчужный бордюр из крема: по верхнему краю и у основания (кроме кремового покрытия с розочками) */
-  if(!(finish==="c_cream"||o.rosettes)){ const br=Math.max(2.6,w*.017), bead=(x,y,q)=>`<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(br*q)}" fill="url(#${id}c)"/><circle cx="${f1(x-br*q*.32)}" cy="${f1(y-br*q*.36)}" r="${f1(br*q*.32)}" fill="#fff" opacity=".7"/>`;
+  if(!(finish==="c_cream"||o.rosettes)){ const br=Math.max(2.6,w*.017), bead=(x,y,q)=>`<ellipse cx="${f1(x)}" cy="${f1(y)}" rx="${f1(br*q*1.2)}" ry="${f1(br*q*.88)}" fill="url(#${id}c)"/><ellipse cx="${f1(x-br*q*.3)}" cy="${f1(y-br*q*.34)}" rx="${f1(br*q*.46)}" ry="${f1(br*q*.22)}" fill="#fff" opacity=".32"/>`;   /* матовый кремовый бордюр, а не «жемчуг» */
     const nb=Math.round(w/(br*1.9));
-    for(let i=0;i<=nb;i++){ const u=i/nb; let x,y; if(shape==="round"){ const a=Math.PI-u*Math.PI; if(cut&&a>A1-.12&&a<A2+.12) continue; [x,y]=P(a,bot); } else [x,y]=edgePt(shape,cx,bot,w,h,u); front+=bead(x,y-br*.55,1); }
-    if(!o.drip && shape==="round"){ const nt=Math.round(Math.PI*w/(br*2.2)), pts=[];
-      for(let i=0;i<nt;i++){ const a=i/nt*Math.PI*2; const am=((a%(Math.PI*2))+Math.PI*2)%(Math.PI*2); if(cut&&am>A1-.12&&am<A2+.12) continue; const [x,y]=P(a,top); pts.push([x,y,Math.sin(a)]); }
+    if(shape==="heart") heartFront(cx,bot,w,h,nb).forEach(([x,y])=>front+=bead(x,y-br*.55,1));
+    else for(let i=0;i<=nb;i++){ const u=i/nb; let x,y; if(shape==="round"){ const a=Math.PI-u*Math.PI; if(cut&&a>A1-.12&&a<A2+.12) continue; [x,y]=P(a,bot); } else [x,y]=edgePt(shape,cx,bot,w,h,u); front+=bead(x,y-br*.55,1); }
+    if(!o.drip && (shape==="round"||shape==="heart")){ const nt=Math.round(Math.PI*w/(br*2.2)), pts=[];
+      if(shape==="heart") heartPts(cx,top,w,h,Math.round(nt*1.15)).forEach(([x,y])=>pts.push([x,y,(y-top)/ry]));
+      else for(let i=0;i<nt;i++){ const a=i/nt*Math.PI*2; const am=((a%(Math.PI*2))+Math.PI*2)%(Math.PI*2); if(cut&&am>A1-.12&&am<A2+.12) continue; const [x,y]=P(a,top); pts.push([x,y,Math.sin(a)]); }
       let tf=""; pts.sort((a,b)=>a[1]-b[1]).forEach(([x,y,sn])=>{ const q=.78+.12*sn; if(sn<0) back+=bead(x,y-br*.35,q); else tf+=bead(x,y-br*.35,q); }); front=tf+front; } }
   return {svg:s+back, front, top, h, cut};
 }
@@ -2145,7 +2230,7 @@ function drawCakeArt(cfg,pfx,text){
   sizes.forEach((s,i)=>{ const isLast=i===sizes.length-1;
     const drip=(cfg.decor||[]).includes("d_drip")&&isLast;
     const T=tierArt({p:pfx,shape:cfg.shape,cx,bot:b,w:s.w,depth:s.d,color,finish:cfg.coating,cut:cfg.cut&&sizes.length===1,layers,rosettes:cfg.rosettes,seed:i*97+s.w,drip});
-    let g=T.svg; if(isLast){ g+=`<g class="deco">${decoArt(pfx,cfg.roses?"roses":cfg.filling,cx,T.top,s.w,T.h,{cut:T.cut,ny:cfg.ny,decor:cfg.decor,metal:cfg.metal,print:cfg.print||(cfg.textPos==="top"&&!!(text||cfg.text)),candle:/\d/.test(cfg.candle||"")})}</g>`;
+    let g=T.svg; if(isLast){ g+=`<g class="deco">${decoArt(pfx,cfg.roses?"roses":fillLook(cfg.filling),cx,T.top,s.w,T.h,{cut:T.cut,ny:cfg.ny,decor:cfg.decor,metal:cfg.metal,print:cfg.print||(cfg.textPos==="top"&&!!(text||cfg.text)),candle:/\d/.test(cfg.candle||"")})}</g>`;
       /* свечи-цифры по центру верхнего яруса */
       const cd=String(cfg.candle||"").replace(/\D/g,"").slice(0,2);
       /* свечи ставим к заднему краю: декор остаётся впереди и не перекрывается */
@@ -2181,7 +2266,7 @@ function drawSlice(cfg,pfx){
     s+=`<path d="M${p1.map(f1)}L${p2.map(f1)}L${p3.map(f1)}L${p4.map(f1)}Z" fill="${L.c}"${L.sp?` filter="url(#${pfx}sp)"`:""}/>`;
     if(L.fruit) for(let k=0;k<5;k++){ const t=(k+.5)/5; s+=`<ellipse cx="${f1(p1[0]+(p2[0]-p1[0])*t)}" cy="${f1((p1[1]+p4[1])/2+(p2[1]-p1[1])*t)}" rx="4" ry="${f1((p4[1]-p1[1])*.32)}" fill="${L.fruit}"/>`; } });
   s+=`<path d="M${TR}L${BR}" stroke="${mix(color,-.1)}" stroke-width="5"/>`;
-  const f=cfg.filling; s+= f==="f_cherry"?cherry(pfx,80,38,7): f==="f_rasp"?rasp(pfx,80,40,6.5): f==="f_mango"?mango(pfx,78,40,9,15)+mango(pfx,90,44,7,-10): macaron(pfx,80,42,8,"#d39b5e");
+  const f=fillLook(cfg.filling); s+= f==="f_cherry"?cherry(pfx,80,38,7): f==="f_rasp"?rasp(pfx,80,40,6.5): f==="f_mango"?mango(pfx,78,40,9,15)+mango(pfx,90,44,7,-10): macaron(pfx,80,42,8,"#d39b5e");
   return svgWrap(s,"0 0 160 120");
 }
 /* ---------- особые десерты ---------- */
@@ -2768,7 +2853,7 @@ function openCat(id){ const p=CAT_ITEMS.find(x=>x.id===id); if(!p) return; const
   $("#orderTg").onclick=async e=>{ if(tg) e.preventDefault(); if(await copyText(txt)) toast(t("toast_tg")); else showText(txt); if(tg) openExternal(tgLink()); };
   const tune=$("#orderTune"); tune.style.display=p.type==="desserts"?"none":""; tune.textContent=t("cat_similar")+" ✎";
   tune.onclick=()=>{ const g=["bento","bento2","mousse"].includes(p.type)?2:p.type==="wedding"?60:8;
-    Object.assign(state,{guests:g,occasion:p.type==="wedding"?"oc_wedding":state.occasion,decor:[],cut:false,_tiersTouched:false}); recalcCake(); closeModals(); renderBuilder(); showStep(1); updatePreview("full"); document.getElementById("builder").scrollIntoView({behavior:"smooth"}); };
+    Object.assign(state,{guests:g,occasion:p.type==="wedding"?"oc_wedding":state.occasion,filling:OPTS.filling.some(o=>o.id===p.flavor)?p.flavor:state.filling,decor:[],cut:false,_tiersTouched:false}); recalcCake(); closeModals(); renderBuilder(); showStep(1); updatePreview("full"); document.getElementById("builder").scrollIntoView({behavior:"smooth"}); };
   openModal("#sheet"); }
 function catSet(o){ Object.assign(cat,o,{shown:cat.page}); renderMenu(); }
 let catT=null;
@@ -2786,7 +2871,7 @@ function openOrder(id){ const p=MENU.find(m=>m.id===id); if(!p) return; const tx
   $("#orderWa").href=waLink(txt); $("#orderTg").href=tgLink(); $("#orderTg").onclick=async e=>{ if(tg) e.preventDefault(); if(await copyText(txt)) toast(t("toast_tg")); else showText(txt); if(tg) openExternal(tgLink()); };
   const tune=$("#orderTune"); tune.style.display=p.art?"":"none";
   tune.onclick=()=>{ const a=p.art, g=a.size===0?2:Math.max(3,Math.round((p.w||1500)/PORTION.def));   /* вес из меню → гости по 200 г */
-    Object.assign(state,{guests:g,shape:a.shape,sponge:a.sponge,filling:a.filling,coating:a.coating,color:a.color,decor:[],cut:false,_tiersTouched:false}); recalcCake(); closeModals(); renderBuilder(); showStep(2); updatePreview("full"); document.getElementById("builder").scrollIntoView({behavior:"smooth"}); };
+    Object.assign(state,{guests:g,shape:a.shape,sponge:a.sponge,filling:FILL_FROM_OLD[a.filling]||a.filling,coating:a.coating,color:a.color,decor:[],cut:false,_tiersTouched:false}); recalcCake(); closeModals(); renderBuilder(); showStep(2); updatePreview("full"); document.getElementById("builder").scrollIntoView({behavior:"smooth"}); };
   openModal("#sheet"); }
 function openModal(id){ $(id).classList.add("open"); document.body.classList.add("lock"); }
 function closeModals(){ document.querySelectorAll(".modal.open").forEach(m=>m.classList.remove("open")); document.body.classList.remove("lock"); }
@@ -2822,7 +2907,9 @@ const flavIcon=id=>{ const p="fv"+id.replace(/\W/g,""); ARTN=0; const plate=`<el
     f_caramel:()=>plate+`<defs>${rgB(p+"cr",[[0,"#f6c47c"],[.5,"#c47b2e"],[1,"#7a4012"]],.4,.35,.8)}</defs><path d="M37 6Q35 22 38 34Q40 38 42 34Q45 22 43 6Z" fill="url(#${p}cr)"/><path d="M39 8Q38 20 39.5 30" stroke="#fff3d6" stroke-opacity=".6" stroke-width="1.2" fill="none" stroke-linecap="round"/><path d="M14 57Q12 50 22 48Q30 44 38 46Q40 40 44 46Q56 43 63 49Q70 55 60 59Q38 63 14 57Z" fill="url(#${p}cr)"/><path d="M22 51Q30 47 36 49" stroke="#fff3d6" stroke-opacity=".75" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M50 49Q56 48 60 52" stroke="#fff3d6" stroke-opacity=".5" stroke-width="1.6" fill="none" stroke-linecap="round"/>`+[[28,54,0],[48,55,30],[54,51,60],[34,52,15],[22,55,45]].map(([x,y,r])=>`<rect x="${x}" y="${y}" width="2.6" height="2.6" fill="#fff" opacity=".95" transform="rotate(${r} ${x} ${y})"/>`).join(""),
     f_rasp:()=>plate+rasp(p,30,50,8)+rasp(p,46,53,8.5)+rasp(p,40,40,7)+blue(p,55,45,4.2)+mint(p,47,32,7,-35),
     f_mango:()=>plate+mango(p,25,50,15,10)+mango(p,40,55,14,-12)+mango(p,33,37,13,25)+passion(p,55,46,11)
-  }[id]; return `<svg viewBox="0 0 80 80" aria-hidden="true">${artDefs(p)}${art?art():""}</svg>`; };
+  }[id];
+  if(!art && /^fl_/.test(id)){ const F=FLAVORS.find(f=>f.id===id)||{}; return F.photo ? `<img src="${F.photo}" alt="" loading="lazy">` : flavorArt(id); }   /* начинки сайта: фото или рисунок кусочка */
+  return `<svg viewBox="0 0 80 80" aria-hidden="true">${artDefs(p)}${art?art():""}</svg>`; };
 const swatchIcon=(c,stripes)=>`<svg width="40" height="40" viewBox="0 0 40 40"><rect x="2" y="2" width="36" height="36" rx="10" fill="${c}"/>${stripes?`<rect x="2" y="17" width="36" height="6" fill="${stripes}"/>`:""}</svg>`;
 /* =========================================================
    6. КОНСТРУКТОР ТОРТА — 5 простых шагов
@@ -2929,8 +3016,11 @@ function renderBuilder(){
     <div class="tierbox" id="tierBox"><h4>${t("tiers")}</h4><div class="seg" id="tierSeg"></div></div></div>
   <div class="pane" data-step="2"><h3>${t("s5_2h")}</h3>
     <h4>${t("shape")}</h4><div class="opts three">${OPTS.shape.map(s=>B("shape",s,t(s),shapeIcon(s))).join("")}</div>
-    <h4>${t("flav_sponge")}</h4><div class="flavs three">${OPTS.sponge.map(o=>flav("sponge",o)).join("")}</div>
-    <h4>${t("flav_fill")}</h4><div class="flavs">${OPTS.filling.map(o=>flav("filling",o)).join("")}</div>
+    <h4>${t("flav_sponge")}</h4><div class="flavs">${OPTS.sponge.map(o=>flav("sponge",o)).join("")}<button type="button" class="flav" data-g="sponge" data-v="sp_custom"><i class="flcustom">${PENCIL_IC}</i><span>${t("sp_custom")}</span></button></div>
+    <input id="fSponge" class="minput spcustom" maxlength="80" placeholder="${esc(plain(t("sp_custom_ph")))}" value="${esc(state.spongeCustom||"")}"${state.sponge==="sp_custom"?"":" hidden"}>
+    <h4>${t("flav_fill")}</h4><div class="flavs${fillOpen?" open":""}" id="fillFlavs">${OPTS.filling.map(o=>flav("filling",o)).join("")}<button type="button" class="flav" data-g="filling" data-v="fill_custom"><i class="flcustom">${PENCIL_IC}</i><span>${t("sp_custom")}</span></button></div>
+    <input id="fFill" class="minput spcustom" maxlength="80" placeholder="${esc(plain(t("fill_custom_ph")))}" value="${esc(state.fillCustom||"")}"${state.filling==="fill_custom"?"":" hidden"}>
+    <button type="button" class="linkbtn fillmore" id="fillMore" data-fillmore></button>
     <div class="fdesc" id="flavorDesc"></div></div>
   <div class="pane" data-step="3"><h3>${t("s5_3h")}</h3>
     <h4>${t("texture")}</h4><div class="opts three">${OPTS.coating.map(o=>B("coating",o,t(o))).join("")}</div>
@@ -2978,7 +3068,7 @@ function syncActive(){
   if(hasD("d_print")&&state.textPos==="top"){ document.querySelectorAll('#posSeg [data-g]').forEach(b=>b.classList.toggle("on",b.dataset.v==="side")); }
   const pn=$("#posNote"); if(pn) pn.textContent= hasD("d_print") ? t("pos_print_note") : "";
   const sn=$("#swname"); if(sn) sn.textContent=t(state.color);
-  const fd=$("#flavorDesc"); if(fd){ const html=[state.sponge,state.filling].map(id=>`<p><b>${t(id)}</b> — ${t("desc_"+id)}</p>`).join("");
+  const fd=$("#flavorDesc"); if(fd){ const html=[state.sponge,state.filling].map(id=>`<p><b>${t(id)}</b> — ${/^fl_/.test(id)?t(id+"_l"):t("desc_"+id)}</p>`).join("");
     if(fd.innerHTML!==html){ fd.innerHTML=html; fd.classList.remove("in"); void fd.offsetWidth; fd.classList.add("in"); } }
   const pp=$("#printPrev"), ptx=$("#printTxt"); if(pp){ pp.classList.toggle("has",!!state.print); if(state.print) pp.src=state.print; ptx.textContent=state.print?t("print_change"):t("print_drop"); }
   syncLead();
@@ -3053,7 +3143,7 @@ function orderText(){
   if(state.occasion) lines.push(`${t("m_occasion",L)}: ${t(state.occasion,L)}`);
   lines.push(`${t("m_guests",L)}: ${state.guests} (${t("portion_s",L).replace("{g}",portion())})`,
     `${t("weight",L)}: ${t("sz"+state.size,L)}, ≈ ${fmtKg(cakeKg(),L)} ${t("kg",L)}${state.tiers>1?`, ${t("tier"+state.tiers,L)}`:""}`,
-    `${t("shape",L)}: ${t(state.shape,L)}`,`${t("m_sponge",L)}: ${t(state.sponge,L)}`,`${t("m_filling",L)}: ${t(state.filling,L)}`,
+    `${t("shape",L)}: ${t(state.shape,L)}`,`${t("m_sponge",L)}: ${state.sponge==="sp_custom"?(state.spongeCustom.trim()||t("sp_custom",L)):t(state.sponge,L)}`,`${t("m_filling",L)}: ${state.filling==="fill_custom"?(state.fillCustom.trim()||t("sp_custom",L)):t(state.filling,L)}`,
     `${t("m_coating",L)}: ${t(state.coating,L)}, ${t(state.color,L)}`);
   if(state.text) lines.push(`${t("m_text",L)}: «${state.text}» — ${t("pos_"+(textOnTop()?"top":"side"),L).toLowerCase()}`);
   if(state.decor.length) lines.push(`${t("decor",L)}: ${state.decor.map(d=>d==="d_candle"&&state.candle?`${t(d,L)} ${state.candle}`:t(d,L)).join(", ")}`);
