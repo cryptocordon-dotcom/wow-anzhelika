@@ -867,6 +867,37 @@ footer{padding:110px 0 50px;border-top:1px solid var(--line)}
   .est b{font-size:26px}
   .stage{padding:16px}
 }
+/* ---------- Меню сайта: кнопка слева вверху и боковая панель ---------- */
+.lft{display:flex;align-items:center;gap:14px}
+.menubtn{width:42px;height:42px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--glass);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:border-color .3s,color .3s}
+.menubtn:hover{border-color:var(--accent);color:var(--accent)}
+.menubtn span{display:block;width:16px;height:1.6px;border-radius:2px;background:currentColor}
+.menubtn span:nth-child(2){width:11px;transform:translateX(-2.5px)}
+@media (max-width:700px){.lft{gap:10px}.menubtn{width:38px;height:38px}}
+nav.main a.on{color:var(--accent)}
+.drawer{position:fixed;inset:0;z-index:200;pointer-events:none}
+.drawer.open{pointer-events:auto}
+.dr-back{position:absolute;inset:0;background:rgba(20,12,8,.38);opacity:0;transition:opacity .4s}
+.drawer.open .dr-back{opacity:1}
+.dr-panel{position:absolute;top:0;bottom:0;left:0;width:min(370px,88vw);background:var(--bg);border-right:1px solid var(--line);box-shadow:var(--shadow);transform:translateX(-104%);transition:transform .5s var(--ease);display:flex;flex-direction:column;padding:20px 18px calc(20px + env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain}
+.drawer.open .dr-panel{transform:none}
+.dr-top{display:flex;align-items:center;justify-content:space-between;margin:0 4px 18px}
+.dr-x{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--text);font-size:22px;line-height:1;cursor:pointer}
+.dr-x:hover{border-color:var(--accent);color:var(--accent)}
+.dr-h{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:0 6px 8px}
+.dr-nav{display:flex;flex-direction:column;gap:2px}
+.dr-nav a{display:flex;align-items:center;gap:14px;padding:9px 10px;border-radius:16px;text-decoration:none;color:var(--text);transition:background .25s;opacity:0;transform:translateX(-12px)}
+.drawer.open .dr-nav a{opacity:1;transform:none;transition:background .25s,opacity .45s var(--ease),transform .45s var(--ease);transition-delay:0s,calc(.05s*var(--i) + .1s),calc(.05s*var(--i) + .1s)}
+.dr-nav a:hover,.dr-nav a.on{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.dr-nav a.on b{color:var(--accent)}
+.dr-nav i{width:40px;height:40px;flex:none;border-radius:13px;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);color:var(--accent)}
+.dr-nav i svg{width:20px;height:20px}
+.dr-nav b{display:block;font:400 17px/1.2 "Playfair Display",serif;transition:color .25s}
+.dr-nav small{display:block;font-size:12px;line-height:1.35;color:var(--muted);margin-top:2px}
+.dr-foot{margin-top:auto;padding:16px 6px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.dr-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.dr-row .theme .tl{display:inline!important}
+.dr-lbl{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
 </style>
 </head>
 <body class="loading">
@@ -875,7 +906,10 @@ footer{padding:110px 0 50px;border-top:1px solid var(--line)}
 <!-- ================= ШАПКА ================= -->
 <header id="hdr">
   <div class="wrap bar">
-    <a class="logo" href="#top" data-scroll="top"><b>WOW</b> <i>Anzhelika</i></a>
+    <div class="lft">
+      <button class="menubtn" id="menuBtn" type="button" aria-label="Menu" aria-controls="drawer" aria-expanded="false"><span></span><span></span><span></span></button>
+      <a class="logo" href="#top" data-scroll="top"><b>WOW</b> <i>Anzhelika</i></a>
+    </div>
     <nav class="main">
       <a href="#newyear" data-scroll="newyear" data-i18n="cat_ny"></a>
       <a href="#about" data-scroll="about" data-i18n="nav_about"></a>
@@ -892,6 +926,23 @@ footer{padding:110px 0 50px;border-top:1px solid var(--line)}
     </div>
   </div>
 </header>
+
+<!-- ================= МЕНЮ САЙТА (кнопка слева вверху) ================= -->
+<div class="drawer" id="drawer" aria-hidden="true">
+  <div class="dr-back" data-dclose></div>
+  <aside class="dr-panel" aria-label="Menu">
+    <div class="dr-top">
+      <a class="logo" href="#top" data-scroll="top"><b>WOW</b> <i>Anzhelika</i></a>
+      <button class="dr-x" type="button" data-dclose aria-label="Close">×</button>
+    </div>
+    <div class="dr-h" data-i18n="dr_title"></div>
+    <nav class="dr-nav" id="drNav"></nav>
+    <div class="dr-foot">
+      <div class="dr-row"><span class="dr-lbl" data-i18n="dr_theme"></span><button class="theme" id="drTheme" type="button"></button></div>
+      <div class="dr-row"><span class="dr-lbl" data-i18n="dr_lang"></span><div class="langs" id="drLangs"></div></div>
+    </div>
+  </aside>
+</div>
 
 <!-- ================= БЛОК 1: ГЛАВНЫЙ ЭКРАН ================= -->
 <section class="hero" id="top">
@@ -2236,7 +2287,7 @@ function renderStatic(){
   const mq=(HOLIDAY?[t("hol_pill")]:[]).concat(PROMO_ON()?[t("promo_pill")]:[]).concat(HOLIDAY&&HOLIDAY.id==="ny"?[]:[t("ny_eyebrow")]).concat(t("marquee")), row=(Array.isArray(mq)?mq:[]).map(x=>`<span>${esc(x)}</span><i>·</i>`).join("");
   $("#marq").innerHTML=row+row+row+row;
   $("#langs").innerHTML=LANGS.map(l=>`<button type="button" data-lang="${l}" class="${l===lang?"on":""}">${l.toUpperCase()}</button>`).join("");
-  renderTheme(); renderCare();
+  renderTheme(); renderCare(); if(typeof renderDrawer==="function") renderDrawer();
 }
 function renderTheme(){ const night=document.documentElement.dataset.theme==="night"; $("#themeBtn").innerHTML=night?`<i class="th-dot night"></i><span class="tl">${t("theme_night")}</span>`:`<i class="th-dot"></i><span class="tl">${t("theme_day")}</span>`;
   if(typeof MAP!=="undefined"&&MAP&&MAP._vcTheme!==night){ MAP._vcTheme=night; mapTiles(); mapMarkers(); } }
@@ -3318,6 +3369,86 @@ if(tg){
 $("#shareBtn").onclick=shareSite;
 const _showStep=showStep; showStep=function(n){ _showStep(n); tgMainButton(); if(tg&&tg.HapticFeedback) try{tg.HapticFeedback.impactOccurred("light")}catch(e){} };
 document.addEventListener("click",e=>{ if(tg && tg.HapticFeedback && e.target.closest("#steps [data-g],.chip,[data-city]")) try{tg.HapticFeedback.selectionChanged()}catch(e){} });
+
+/* =========================================================
+   МЕНЮ САЙТА: кнопка слева вверху — все разделы, тема и язык.
+   Раздел, который сейчас на экране, подсвечивается (и в меню, и в верхней строке).
+   ========================================================= */
+const I18N_MENU = {
+ ru:{dr_title:"Разделы сайта",dr_theme:"Тема",dr_lang:"Язык",
+  dr_top:"Главная",dh_top:"Акция и подборка к празднику",dr_about:"Об Анжелике",dh_about:"Кондитер 5-го разряда, швейцарская школа",
+  dr_newyear:"Новый год",dh_newyear:"Новогодняя коллекция, заказ до 28 декабря",dr_delivery:"Доставка",dh_delivery:"От Несебра до Бургаса, проверьте свой город",
+  dr_menu:"Каталог тортов",dh_menu:"250+ работ с поиском и фильтрами",dr_buns:"Выпечка",dh_buns:"Булочки поштучно, от 5 штук",
+  dr_flavors:"Начинки",dh_flavors:"Фирменные и классические, с составом",dr_builder:"Конструктор торта",dh_builder:"Соберите торт и сразу узнайте цену",
+  dr_care:"Календарь дат",dh_care:"Напомним о дне рождения и празднике"},
+ en:{dr_title:"Site sections",dr_theme:"Theme",dr_lang:"Language",
+  dr_top:"Home",dh_top:"Offer and holiday selection",dr_about:"About Angelika",dh_about:"Master pastry chef, Swiss school",
+  dr_newyear:"New Year",dh_newyear:"New Year collection, order by 28 December",dr_delivery:"Delivery",dh_delivery:"From Nessebar to Burgas, check your town",
+  dr_menu:"Cake catalogue",dh_menu:"250+ cakes with search and filters",dr_buns:"Bakery",dh_buns:"Sweet buns by the piece, from 5",
+  dr_flavors:"Fillings",dh_flavors:"Signature and classic, with ingredients",dr_builder:"Cake builder",dh_builder:"Build your cake and see the price",
+  dr_care:"Date calendar",dh_care:"We'll remind you of birthdays and holidays"},
+ bg:{dr_title:"Раздели на сайта",dr_theme:"Тема",dr_lang:"Език",
+  dr_top:"Начало",dh_top:"Промоция и подборка за празника",dr_about:"За Анжелика",dh_about:"Сладкар 5-ти разряд, швейцарска школа",
+  dr_newyear:"Нова година",dh_newyear:"Новогодишна колекция, поръчки до 28 декември",dr_delivery:"Доставка",dh_delivery:"От Несебър до Бургас, проверете своя град",
+  dr_menu:"Каталог торти",dh_menu:"250+ работи с търсене и филтри",dr_buns:"Тестени",dh_buns:"Кифлички на брой, от 5 броя",
+  dr_flavors:"Пълнежи",dh_flavors:"Фирмени и класически, със състав",dr_builder:"Конструктор на торта",dh_builder:"Съберете торта и вижте цената",
+  dr_care:"Календар на датите",dh_care:"Ще напомним за рожден ден и празник"},
+ ch:{dr_title:"Bereiche der Seite",dr_theme:"Design",dr_lang:"Sprache",
+  dr_top:"Start",dh_top:"Aktion und Festtagsauswahl",dr_about:"Über Angelika",dh_about:"Konditormeisterin, Schweizer Schule",
+  dr_newyear:"Neujahr",dh_newyear:"Neujahrskollektion, Bestellung bis 28. Dezember",dr_delivery:"Lieferung",dh_delivery:"Von Nessebar bis Burgas, Ort prüfen",
+  dr_menu:"Tortenkatalog",dh_menu:"250+ Torten mit Suche und Filtern",dr_buns:"Gebäck",dh_buns:"Süsse Brötchen pro Stück, ab 5",
+  dr_flavors:"Füllungen",dh_flavors:"Haus- und Klassiker, mit Zutaten",dr_builder:"Torten-Konfigurator",dh_builder:"Torte gestalten, Preis sofort sehen",
+  dr_care:"Datumskalender",dh_care:"Wir erinnern an Geburtstage und Feste"},
+ it:{dr_title:"Sezioni del sito",dr_theme:"Tema",dr_lang:"Lingua",
+  dr_top:"Home",dh_top:"Offerta e selezione per la festa",dr_about:"Chi è Angelika",dh_about:"Pasticciera esperta, scuola svizzera",
+  dr_newyear:"Capodanno",dh_newyear:"Collezione di Capodanno, ordini entro il 28 dicembre",dr_delivery:"Consegna",dh_delivery:"Da Nessebar a Burgas, cercate la vostra città",
+  dr_menu:"Catalogo torte",dh_menu:"250+ creazioni con ricerca e filtri",dr_buns:"Forno",dh_buns:"Panini dolci al pezzo, da 5",
+  dr_flavors:"Ripieni",dh_flavors:"Firmati e classici, con ingredienti",dr_builder:"Configuratore di torte",dh_builder:"Componete la torta e vedete il prezzo",
+  dr_care:"Calendario delle date",dh_care:"Vi ricordiamo compleanni e feste"},
+ ua:{dr_title:"Розділи сайту",dr_theme:"Тема",dr_lang:"Мова",
+  dr_top:"Головна",dh_top:"Акція та добірка до свята",dr_about:"Про Анжеліку",dh_about:"Кондитер 5-го розряду, швейцарська школа",
+  dr_newyear:"Новий рік",dh_newyear:"Новорічна колекція, замовлення до 28 грудня",dr_delivery:"Доставка",dh_delivery:"Від Несебра до Бургаса, перевірте своє місто",
+  dr_menu:"Каталог тортів",dh_menu:"250+ робіт із пошуком і фільтрами",dr_buns:"Випічка",dh_buns:"Булочки поштучно, від 5 штук",
+  dr_flavors:"Начинки",dh_flavors:"Фірмові та класичні, зі складом",dr_builder:"Конструктор торта",dh_builder:"Зберіть торт і одразу дізнайтеся ціну",
+  dr_care:"Календар дат",dh_care:"Нагадаємо про день народження та свято"}
+};
+Object.keys(I18N_MENU).forEach(l=>{ if(I18N[l]) Object.assign(I18N[l],I18N_MENU[l]); });
+const DR_IC = {
+ top:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>',
+ about:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.6 7-5.6s6.2 2 7 5.6"/></svg>',
+ newyear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/><path d="M10 4.5l2 1.5 2-1.5M10 19.5l2-1.5 2 1.5"/></svg>',
+ delivery:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+ menu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>',
+ buns:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19c-5 0-8-2.5-8-6 0-3.5 3.6-7 8-7s8 3.5 8 7c0 3.5-3 6-8 6z"/><path d="M8.5 9.5c1 1 1 3 0 4M12 8.5c1.2 1.2 1.2 4.3 0 5.5M15.5 9.5c1 1 1 3 0 4"/></svg>',
+ flavors:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l14-5 4 5"/><path d="M3 9h18v11H3z"/><path d="M3 13.5h18M3 17h18"/></svg>',
+ builder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M5 20v-6h14v6"/><path d="M7 14v-4h10v4"/><path d="M12 10V6"/><path d="M12 6c-1.2-1-1.2-2.4 0-3.4 1.2 1 1.2 2.4 0 3.4z"/></svg>',
+ care:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 13.2l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L9.1 15.3l2-.3z"/></svg>'
+};
+const DR_ITEMS = ["top","about","newyear","delivery","menu","buns","flavors","builder","care"];   /* в том же порядке, что и на странице */
+let drCur = "top";
+function renderDrawer(){
+  const nav=document.getElementById("drNav"); if(!nav) return;
+  nav.innerHTML=DR_ITEMS.filter(id=>document.getElementById(id)).map((id,i)=>`<a href="#${id}" data-scroll="${id}" data-sec="${id}" style="--i:${i}"${id===drCur?' class="on"':""}><i>${DR_IC[id]}</i><span><b>${t("dr_"+id)}</b><small>${t("dh_"+id)}</small></span></a>`).join("");
+  document.getElementById("drLangs").innerHTML=LANGS.map(l=>`<button type="button" data-lang="${l}" class="${l===lang?"on":""}">${l.toUpperCase()}</button>`).join("");
+  syncDrTheme();
+}
+function syncDrTheme(){ const a=document.getElementById("themeBtn"), b=document.getElementById("drTheme"); if(a&&b) b.innerHTML=a.innerHTML; }
+function drawer(open){ const d=document.getElementById("drawer"); if(!d) return;
+  d.classList.toggle("open",open); d.setAttribute("aria-hidden",String(!open)); $("#menuBtn").setAttribute("aria-expanded",String(open));
+  document.body.classList.toggle("lock",open || !!document.querySelector(".modal.open")); }
+$("#menuBtn").onclick=()=>drawer(true);
+$("#drTheme").onclick=()=>$("#themeBtn").click();
+document.addEventListener("click",e=>{ if(e.target.closest("[data-dclose]") || e.target.closest("#drawer [data-scroll]")) drawer(false); },true);
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") drawer(false); });
+new MutationObserver(syncDrTheme).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+/* какой раздел сейчас на экране */
+let drSpyT=0;
+function drSpy(){ drSpyT=0; const y=innerHeight*.35; let cur="top", best=-Infinity;
+  DR_ITEMS.forEach(id=>{ const el=document.getElementById(id); if(!el) return; const top=el.getBoundingClientRect().top; if(top<=y && top>best){ best=top; cur=id; } });
+  if(cur===drCur) return; drCur=cur;
+  document.querySelectorAll("#drNav [data-sec]").forEach(a=>a.classList.toggle("on",a.dataset.sec===cur));
+  document.querySelectorAll("nav.main a[data-scroll]").forEach(a=>a.classList.toggle("on",a.dataset.scroll===cur)); }
+addEventListener("scroll",()=>{ if(!drSpyT) drSpyT=requestAnimationFrame(drSpy); },{passive:true});
 
 /* =========================================================
    8. СТАРТ
