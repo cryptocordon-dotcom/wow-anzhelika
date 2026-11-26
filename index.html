@@ -2766,9 +2766,13 @@ function catGroup(p){
 let CAT_MIXED=null;
 function catMix(items){
   if(CAT_MIXED&&CAT_MIXED.length===items.length) return CAT_MIXED;
-  const g={}; items.forEach(p=>{ const k=catGroup(p); (g[k]=g[k]||[]).push(p); });
+  /* при каждом открытии сайта — новый случайный порядок: работы внутри каждого вида и сами виды перемешиваются,
+     но по кругу, чтобы в первых рядах всё равно были разные виды тортов. «Показать ещё» продолжает тот же порядок. */
+  const shuf=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+  const g={}; items.forEach(p=>{ const k=catGroup(p); (g[k]=g[k]||[]).push(p); }); Object.values(g).forEach(shuf);
+  const order=shuf([...CAT_MIX_ORDER]);
   const out=[]; let left=true;
-  while(left){ left=false; CAT_MIX_ORDER.forEach(k=>{ if(g[k]&&g[k].length){ out.push(g[k].shift()); left=true; } }); }
+  while(left){ left=false; order.forEach(k=>{ if(g[k]&&g[k].length){ out.push(g[k].shift()); left=true; } }); }
   return CAT_MIXED=out;
 }
 function renderCatGrid(){
